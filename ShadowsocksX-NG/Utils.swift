@@ -7,6 +7,26 @@
 //
 
 import Foundation
+import UserNotifications
+import CryptoKit
+
+
+/// Post a user notification using the modern UserNotifications framework.
+/// Replaces the deprecated/removed NSUserNotification API (gone since macOS 11+).
+func postUserNotification(title: String, subtitle: String = "", body: String = "", sound: Bool = false) {
+    let center = UNUserNotificationCenter.current()
+    center.requestAuthorization(options: [.alert, .sound]) { granted, _ in
+        guard granted else { return }
+        let content = UNMutableNotificationContent()
+        content.title = title
+        if !subtitle.isEmpty { content.subtitle = subtitle }
+        if !body.isEmpty { content.body = body }
+        if sound { content.sound = .default }
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString, content: content, trigger: nil)
+        center.add(request, withCompletionHandler: nil)
+    }
+}
 
 
 extension String {
@@ -18,11 +38,8 @@ extension String {
 
 extension Data {
     func sha1() -> String {
-        let data = self
-        var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
-        CC_SHA1((data as NSData).bytes, CC_LONG(data.count), &digest)
-        let hexBytes = digest.map { String(format: "%02hhx", $0) }
-        return hexBytes.joined(separator: "")
+        let digest = Insecure.SHA1.hash(data: self)
+        return digest.map { String(format: "%02hhx", $0) }.joined()
     }
 }
 

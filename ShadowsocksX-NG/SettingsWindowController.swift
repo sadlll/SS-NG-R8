@@ -235,16 +235,12 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTableVie
 
                     if GeneratePACFile() {
                         // Popup a user notification
-                        let notification = NSUserNotification()
-                        notification.title = "PAC has been updated by User Rules.".localized
                         DispatchQueue.main.async {
-                            NSUserNotificationCenter.default.deliver(notification)
+                            postUserNotification(title: "PAC has been updated by User Rules.".localized)
                             NotificationCenter.default.post(name: NOTIFY_ADV_CONF_CHANGED, object: nil)
                         }
                     } else {
-                        let notification = NSUserNotification()
-                        notification.title = "It's failed to update PAC by User Rules.".localized
-                        NSUserNotificationCenter.default.deliver(notification)
+                        postUserNotification(title: "It's failed to update PAC by User Rules.".localized)
                     }
                 } catch {}
                 updateChanged = false

@@ -8,12 +8,36 @@
 
 import Foundation
 
-let SS_LOCAL_VERSION = "2.5.6.12.static"
-let PRIVOXY_VERSION = "3.0.28.static"
+let SS_LOCAL_VERSION = "2.5.6.12.arm64"
+let PRIVOXY_VERSION = "4.2.0.arm64"
 let APP_SUPPORT_DIR = "/Library/Application Support/ShadowsocksX-NG-R8/"
 let LAUNCH_AGENT_DIR = "/Library/LaunchAgents/"
 let LAUNCH_AGENT_CONF_SSLOCAL_NAME = "com.qiuyuzhou.shadowsocksX-NG.local.plist"
 let LAUNCH_AGENT_CONF_PRIVOXY_NAME = "com.qiuyuzhou.shadowsocksX-NG.http.plist"
+
+
+/// Run a bundled shell script to completion and report success on the main queue.
+/// Replaces the deprecated `Process.launchedProcess(launchPath:arguments:)`.
+private func runBundledScript(_ resource: String, finish: @escaping (_ success: Bool) -> ()) {
+    guard let scriptPath = Bundle.main.path(forResource: resource, ofType: nil) else {
+        NSLog("Bundled script not found: \(resource)")
+        DispatchQueue.main.async { finish(false) }
+        return
+    }
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: scriptPath)
+    task.arguments = []
+    do {
+        try task.run()
+    } catch {
+        NSLog("Failed to launch \(resource): \(error)")
+        DispatchQueue.main.async { finish(false) }
+        return
+    }
+    task.waitUntilExit()
+    let success = task.terminationStatus == 0
+    DispatchQueue.main.async { finish(success) }
+}
 
 
 func getFileSHA1Sum(_ filepath: String) -> String {
@@ -85,56 +109,23 @@ func generateSSLocalLauchAgentPlist() -> Bool {
 }
 
 func ReloadConfSSLocal(finish: @escaping(_ success: Bool)->()) {
-    let bundle = Bundle.main
-    let installerPath = bundle.path(forResource: "reload_conf_ss_local.sh", ofType: nil)
-    let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-    task.waitUntilExit()
-    if task.terminationStatus == 0 {
-        NSLog("Start ss-local succeeded.")
-        DispatchQueue.main.async {
-            finish(true)
-        }
-    } else {
-        NSLog("Start ss-local failed.")
-        DispatchQueue.main.async {
-            finish(false)
-        }
+    runBundledScript("reload_conf_ss_local.sh") { success in
+        NSLog(success ? "Start ss-local succeeded." : "Start ss-local failed.")
+        finish(success)
     }
 }
 
 func StartSSLocal(finish: @escaping(_ success: Bool)->()) {
-    let bundle = Bundle.main
-    let installerPath = bundle.path(forResource: "start_ss_local.sh", ofType: nil)
-    let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-    task.waitUntilExit()
-    if task.terminationStatus == 0 {
-        NSLog("Start ss-local succeeded.")
-        DispatchQueue.main.async {
-            finish(true)
-        }
-    } else {
-        NSLog("Start ss-local failed.")
-        DispatchQueue.main.async {
-            finish(false)
-        }
+    runBundledScript("start_ss_local.sh") { success in
+        NSLog(success ? "Start ss-local succeeded." : "Start ss-local failed.")
+        finish(success)
     }
 }
 
 func StopSSLocal(finish: @escaping(_ success: Bool)->()) {
-    let bundle = Bundle.main
-    let installerPath = bundle.path(forResource: "stop_ss_local.sh", ofType: nil)
-    let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-    task.waitUntilExit()
-    if task.terminationStatus == 0 {
-        NSLog("Stop ss-local succeeded.")
-        DispatchQueue.main.async {
-            finish(true)
-        }
-    } else {
-        NSLog("Stop ss-local failed.")
-        DispatchQueue.main.async {
-            finish(false)
-        }
+    runBundledScript("stop_ss_local.sh") { success in
+        NSLog(success ? "Stop ss-local succeeded." : "Stop ss-local failed.")
+        finish(success)
     }
 }
 
@@ -142,21 +133,10 @@ func InstallSSLocal(finish: @escaping(_ success: Bool)->()) {
     let fileMgr = FileManager.default
     let homeDir = NSHomeDirectory()
     let appSupportDir = homeDir+APP_SUPPORT_DIR
-    if !fileMgr.fileExists(atPath: appSupportDir + "ss-local-\(SS_LOCAL_VERSION)/ss-local") || !fileMgr.fileExists(atPath: appSupportDir + "libcrypto.1.0.0.dylib") {
-        let bundle = Bundle.main
-        let installerPath = bundle.path(forResource: "install_ss_local.sh", ofType: nil)
-        let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-        task.waitUntilExit()
-        if task.terminationStatus == 0 {
-            NSLog("Install ss-local succeeded.")
-            DispatchQueue.main.async {
-                finish(true)
-            }
-        } else {
-            NSLog("Install ss-local failed.")
-            DispatchQueue.main.async {
-                finish(false)
-            }
+    if !fileMgr.fileExists(atPath: appSupportDir + "ss-local-\(SS_LOCAL_VERSION)/ss-local") {
+        runBundledScript("install_ss_local.sh") { success in
+            NSLog(success ? "Install ss-local succeeded." : "Install ss-local failed.")
+            finish(success)
         }
     } else {
         finish(true)
@@ -164,20 +144,9 @@ func InstallSSLocal(finish: @escaping(_ success: Bool)->()) {
 }
 
 func RemoveSSLocal(finish: @escaping(_ success: Bool)->()) {
-    let bundle = Bundle.main
-    let installerPath = bundle.path(forResource: "remove_ss_local.sh", ofType: nil)
-    let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-    task.waitUntilExit()
-    if task.terminationStatus == 0 {
-        NSLog("Remove ss-local succeeded.")
-        DispatchQueue.main.async {
-            finish(true)
-        }
-    } else {
-        NSLog("Remove ss-local failed.")
-        DispatchQueue.main.async {
-            finish(false)
-        }
+    runBundledScript("remove_ss_local.sh") { success in
+        NSLog(success ? "Remove ss-local succeeded." : "Remove ss-local failed.")
+        finish(success)
     }
 }
 
@@ -290,56 +259,23 @@ func generatePrivoxyLauchAgentPlist() -> Bool {
 
 
 func ReloadConfPrivoxy(finish: @escaping(_ success: Bool)->()) {
-    let bundle = Bundle.main
-    let installerPath = bundle.path(forResource: "reload_conf_privoxy.sh", ofType: nil)
-    let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-    task.waitUntilExit()
-    if task.terminationStatus == 0 {
-        NSLog("reload privoxy succeeded.")
-        DispatchQueue.main.async {
-            finish(true)
-        }
-    } else {
-        NSLog("reload privoxy failed.")
-        DispatchQueue.main.async {
-            finish(false)
-        }
+    runBundledScript("reload_conf_privoxy.sh") { success in
+        NSLog(success ? "reload privoxy succeeded." : "reload privoxy failed.")
+        finish(success)
     }
 }
 
 func StartPrivoxy(finish: @escaping(_ success: Bool)->()) {
-    let bundle = Bundle.main
-    let installerPath = bundle.path(forResource: "start_privoxy.sh", ofType: nil)
-    let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-    task.waitUntilExit()
-    if task.terminationStatus == 0 {
-        NSLog("Start privoxy succeeded.")
-        DispatchQueue.main.async {
-            finish(true)
-        }
-    } else {
-        NSLog("Start privoxy failed.")
-        DispatchQueue.main.async {
-            finish(false)
-        }
+    runBundledScript("start_privoxy.sh") { success in
+        NSLog(success ? "Start privoxy succeeded." : "Start privoxy failed.")
+        finish(success)
     }
 }
 
 func StopPrivoxy(finish: @escaping(_ success: Bool)->()) {
-    let bundle = Bundle.main
-    let installerPath = bundle.path(forResource: "stop_privoxy.sh", ofType: nil)
-    let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-    task.waitUntilExit()
-    if task.terminationStatus == 0 {
-        NSLog("Stop privoxy succeeded.")
-        DispatchQueue.main.async {
-            finish(true)
-        }
-    } else {
-        NSLog("Stop privoxy failed.")
-        DispatchQueue.main.async {
-            finish(false)
-        }
+    runBundledScript("stop_privoxy.sh") { success in
+        NSLog(success ? "Stop privoxy succeeded." : "Stop privoxy failed.")
+        finish(success)
     }
 }
 
@@ -347,21 +283,10 @@ func InstallPrivoxy(finish: @escaping(_ success: Bool)->()) {
     let fileMgr = FileManager.default
     let homeDir = NSHomeDirectory()
     let appSupportDir = homeDir+APP_SUPPORT_DIR
-    if !fileMgr.fileExists(atPath: appSupportDir + "privoxy-\(PRIVOXY_VERSION)/privoxy") || !fileMgr.fileExists(atPath: appSupportDir + "libpcre.1.dylib") {
-        let bundle = Bundle.main
-        let installerPath = bundle.path(forResource: "install_privoxy.sh", ofType: nil)
-        let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-        task.waitUntilExit()
-        if task.terminationStatus == 0 {
-            NSLog("Install privoxy succeeded.")
-            DispatchQueue.main.async {
-                finish(true)
-            }
-        } else {
-            NSLog("Install privoxy failed.")
-            DispatchQueue.main.async {
-                finish(false)
-            }
+    if !fileMgr.fileExists(atPath: appSupportDir + "privoxy-\(PRIVOXY_VERSION)/privoxy") {
+        runBundledScript("install_privoxy.sh") { success in
+            NSLog(success ? "Install privoxy succeeded." : "Install privoxy failed.")
+            finish(success)
         }
     } else {
         finish(true)
@@ -369,20 +294,9 @@ func InstallPrivoxy(finish: @escaping(_ success: Bool)->()) {
 }
 
 func RemovePrivoxy(finish: @escaping(_ success: Bool)->()) {
-    let bundle = Bundle.main
-    let installerPath = bundle.path(forResource: "remove_privoxy.sh", ofType: nil)
-    let task = Process.launchedProcess(launchPath: installerPath!, arguments: [""])
-    task.waitUntilExit()
-    if task.terminationStatus == 0 {
-        NSLog("Remove privoxy succeeded.")
-        DispatchQueue.main.async {
-            finish(true)
-        }
-    } else {
-        NSLog("Remove privoxy failed.")
-        DispatchQueue.main.async {
-            finish(false)
-        }
+    runBundledScript("remove_privoxy.sh") { success in
+        NSLog(success ? "Remove privoxy succeeded." : "Remove privoxy failed.")
+        finish(success)
     }
 }
 

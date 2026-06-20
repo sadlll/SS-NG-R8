@@ -7,8 +7,9 @@
 //
 
 import Cocoa
+import UserNotifications
 
-class MainMenuManager: NSObject, NSUserNotificationCenterDelegate {
+class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     // MARK: Controllers
     var qrcodeWinCtrl: SWBQRCodeWindowController!
     var preferencesWinCtrl: PreferencesWindowController!
@@ -49,7 +50,8 @@ class MainMenuManager: NSObject, NSUserNotificationCenterDelegate {
     override func awakeFromNib() {
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(self.handleURLEvent), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         
-        NSUserNotificationCenter.default.delegate = self
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         // Prepare ss-local
         InstallSSLocal { (s) in
             InstallPrivoxy { (ss) in
@@ -303,11 +305,8 @@ class MainMenuManager: NSObject, NSUserNotificationCenterDelegate {
         } else {
             errMsg = "No current server profile.".localized
         }
-        let userNote = NSUserNotification()
-        userNote.title = errMsg
-        userNote.soundName = NSUserNotificationDefaultSoundName
-        
-        NSUserNotificationCenter.default.deliver(userNote);
+        let userNote = errMsg ?? ""
+        postUserNotification(title: userNote, sound: true)
     }
     
     @IBAction func scanQRCodeFromScreen(_ sender: NSMenuItem) {
@@ -702,23 +701,22 @@ class MainMenuManager: NSObject, NSUserNotificationCenterDelegate {
     
     private func foundSSRURL(_ note: Notification) {
         func failedNotification() {
-            let userNote = NSUserNotification()
-            userNote.title = "Failed to Add Server Profile".localized
-            userNote.subtitle = "Address can not be recognized".localized
-            NSUserNotificationCenter.default.deliver(userNote)
+            postUserNotification(
+                title: "Failed to Add Server Profile".localized,
+                subtitle: "Address can not be recognized".localized)
         }
         func successNotification(userInfo:[AnyHashable : Any], text: String) {
-            let userNote = NSUserNotification()
-            userNote.title = "Add Shadowsocks Server Profile".localized
+            var subtitle = ""
             if userInfo["source"] as! String == "qrcode" {
-                userNote.subtitle = "By scan QR Code".localized
+                subtitle = "By scan QR Code".localized
             } else if userInfo["source"] as! String == "url" {
-                userNote.subtitle = "By Handle SS URL".localized
+                subtitle = "By Handle SS URL".localized
             }
-            userNote.informativeText = text
-            userNote.soundName = NSUserNotificationDefaultSoundName
-            
-            NSUserNotificationCenter.default.deliver(userNote)
+            postUserNotification(
+                title: "Add Shadowsocks Server Profile".localized,
+                subtitle: subtitle,
+                body: text,
+                sound: true)
         }
         if let userInfo = (note as NSNotification).userInfo {
             let urls: [URL] = userInfo["urls"] as! [URL]
@@ -820,10 +818,10 @@ class MainMenuManager: NSObject, NSUserNotificationCenterDelegate {
         }
     }
     //------------------------------------------------------------
-    // MARK: NSUserNotificationCenterDelegate
+    // MARK: UNUserNotificationCenterDelegate
     
-    func userNotificationCenter(_ center: NSUserNotificationCenter, shouldPresent notification: NSUserNotification) -> Bool {
-        return true
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
     }
     
     func makeToast(_ message: String) {

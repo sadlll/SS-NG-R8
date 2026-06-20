@@ -62,10 +62,7 @@ class ServerProfileManager: NSObject {
     }
     
     static func noService() {
-        let notice = NSUserNotification()
-        notice.title = "还没有服务器设定！"
-        notice.subtitle = "去设置里面填一下吧，填完记得选择呦~"
-        NSUserNotificationCenter.default.deliver(notice)
+        postUserNotification(title: "还没有服务器设定！", subtitle: "去设置里面填一下吧，填完记得选择呦~")
     }
     
     func setActiveProfiledId(_ id: String) {
@@ -201,17 +198,13 @@ class ServerProfileManager: NSObject {
                     }
                     NotificationCenter.default.post(name: NOTIFY_SERVER_PROFILES_CHANGED, object: nil)
                     let configsCount = (jsonArr1.object(forKey: "configs") as! [[String: AnyObject]]).count
-                    let notification = NSUserNotification()
-                    notification.title = "Import Server Profile succeed!".localized
-                    notification.informativeText = "Successful import \(configsCount) items".localized
-                    NSUserNotificationCenter.default
-                        .deliver(notification)
+                    postUserNotification(
+                        title: "Import Server Profile succeed!".localized,
+                        body: "Successful import \(configsCount) items".localized)
                 }else{
-                    let notification = NSUserNotification()
-                    notification.title = "Import Server Profile failed!".localized
-                    notification.informativeText = "Invalid config file!".localized
-                    NSUserNotificationCenter.default
-                        .deliver(notification)
+                    postUserNotification(
+                        title: "Import Server Profile failed!".localized,
+                        body: "Invalid config file!".localized)
                     return
                 }
             }
@@ -270,11 +263,9 @@ class ServerProfileManager: NSObject {
                 //write jsonArr1 back to file
                 try! jsonString.write(toFile: (savePanel.url?.path)!, atomically: true, encoding: String.Encoding.utf8)
                 NSWorkspace.shared.selectFile((savePanel.url?.path)!, inFileViewerRootedAtPath: (savePanel.directoryURL?.path)!)
-                let notification = NSUserNotification()
-                notification.title = "Export Server Profile succeed!".localized
-                notification.informativeText = "Successful Export \(self.profiles.count) items".localized
-                NSUserNotificationCenter.default
-                    .deliver(notification)
+                postUserNotification(
+                    title: "Export Server Profile succeed!".localized,
+                    body: "Successful Export \(self.profiles.count) items".localized)
             }
         }
     }

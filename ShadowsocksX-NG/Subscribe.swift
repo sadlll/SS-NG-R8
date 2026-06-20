@@ -318,12 +318,7 @@ import Alamofire
     }
     
     fileprivate func pushNotification(title: String, subtitle: String, info: String){
-        let userNote = NSUserNotification()
-        userNote.title = title
-        userNote.subtitle = subtitle
-        userNote.informativeText = info
-        userNote.soundName = NSUserNotificationDefaultSoundName
-        NSUserNotificationCenter.default.deliver(userNote);
+        postUserNotification(title: title, subtitle: subtitle, body: info, sound: true)
     }
     
     class func isSame(source: Subscribe, target: Subscribe) -> Bool {

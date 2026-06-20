@@ -8,12 +8,10 @@
 
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
-ssLocalVersion=2.5.6.12.static
+ssLocalVersion=2.5.6.12.arm64
 mkdir -p "$HOME/Library/Application Support/ShadowsocksX-NG-R8/ss-local-$ssLocalVersion"
 cp -f ss-local "$HOME/Library/Application Support/ShadowsocksX-NG-R8/ss-local-$ssLocalVersion/"
 rm -f "$HOME/Library/Application Support/ShadowsocksX-NG-R8/ss-local"
 ln -s "$HOME/Library/Application Support/ShadowsocksX-NG-R8/ss-local-$ssLocalVersion/ss-local" "$HOME/Library/Application Support/ShadowsocksX-NG-R8/ss-local"
-
-cp -f libcrypto.1.0.0.dylib "$HOME/Library/Application Support/ShadowsocksX-NG-R8/"
 
 echo done

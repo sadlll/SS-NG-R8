@@ -201,16 +201,12 @@ func UpdatePACFromGFWList(finish:@escaping()->()) {
             try value.write(toFile: GFWListFilePath, atomically: true, encoding: String.Encoding.utf8)
             if GeneratePACFile() {
                 // Popup a user notification
-                let notification = NSUserNotification()
-                notification.title = "PAC has been updated by latest GFW List.".localized
-                NSUserNotificationCenter.default.deliver(notification)
+                postUserNotification(title: "PAC has been updated by latest GFW List.".localized)
             }
             finish()
         } catch {
             // Popup a user notification
-            let notification = NSUserNotification()
-            notification.title = "Failed to download latest GFW List.".localized
-            NSUserNotificationCenter.default.deliver(notification)
+            postUserNotification(title: "Failed to download latest GFW List.".localized)
             finish()
         }
     }
@@ -276,16 +272,12 @@ func UpdateACL(finish:@escaping()->()) {
                     try value.write(toFile: ACLWhiteListFilePath, atomically: true, encoding: String.Encoding.utf8)
                     if GeneratePACFile() {
                         // Popup a user notification
-                        let notification = NSUserNotification()
-                        notification.title = "White List update succeed.".localized
-                        NSUserNotificationCenter.default.deliver(notification)
+                        postUserNotification(title: "White List update succeed.".localized)
                     }
                     group.leave()
                 } catch {
                     // Popup a user notification
-                    let notification = NSUserNotification()
-                    notification.title = "Failed to download latest White List update succeed.".localized
-                    NSUserNotificationCenter.default.deliver(notification)
+                    postUserNotification(title: "Failed to download latest White List update succeed.".localized)
                     group.leave()
                 }
             }
@@ -301,16 +293,12 @@ func UpdateACL(finish:@escaping()->()) {
                     try value.write(toFile: ACLGFWListFilePath, atomically: true, encoding: String.Encoding.utf8)
                     if GeneratePACFile() {
                         // Popup a user notification
-                        let notification = NSUserNotification()
-                        notification.title = "Black List update succeed.".localized
-                        NSUserNotificationCenter.default.deliver(notification)
+                        postUserNotification(title: "Black List update succeed.".localized)
                     }
                     group.leave()
                 } catch {
                     // Popup a user notification
-                    let notification = NSUserNotification()
-                    notification.title = "Failed to download latest Black List update succeed.".localized
-                    NSUserNotificationCenter.default.deliver(notification)
+                    postUserNotification(title: "Failed to download latest Black List update succeed.".localized)
                     group.leave()
                 }
             }
@@ -326,16 +314,12 @@ func UpdateACL(finish:@escaping()->()) {
                     try value.write(toFile: ACLBackCHNFilePath, atomically: true, encoding: String.Encoding.utf8)
                     if GeneratePACFile() {
                         // Popup a user notification
-                        let notification = NSUserNotification()
-                        notification.title = "BackCHN List update succeed.".localized
-                        NSUserNotificationCenter.default.deliver(notification)
+                        postUserNotification(title: "BackCHN List update succeed.".localized)
                     }
                     group.leave()
                 }catch {
                     // Popup a user notification
-                    let notification = NSUserNotification()
-                    notification.title = "Failed to download latest BackCHN List update succeed.".localized
-                    NSUserNotificationCenter.default.deliver(notification)
+                    postUserNotification(title: "Failed to download latest BackCHN List update succeed.".localized)
                     group.leave()
                 }
             }

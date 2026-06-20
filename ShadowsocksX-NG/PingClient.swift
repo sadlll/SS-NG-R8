@@ -109,12 +109,10 @@ class PingServers:NSObject{
             
             if fastTime != Double.infinity {
                 let ft = NumberFormatter.three(SerMgr.profiles[fastID].latency)
-                let notice = NSUserNotification()
-                notice.title = "ICMP测试完成！最快\(ft)ms"
-                notice.subtitle = "最快的是\(SerMgr.profiles[fastID].serverHost) \(SerMgr.profiles[fastID].remark)"
-                
-                NSUserNotificationCenter.default.deliver(notice)
-                
+                postUserNotification(
+                    title: "ICMP测试完成！最快\(ft)ms",
+                    subtitle: "最快的是\(SerMgr.profiles[fastID].serverHost) \(SerMgr.profiles[fastID].remark)")
+
                 UserDefaults.standard.setValue("\(ft)", forKey: USERDEFAULTS_FASTEST_NODE)
                 UserDefaults.standard.synchronize()
                 
