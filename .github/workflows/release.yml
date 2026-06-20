@@ -1,0 +1,83 @@
+name: Build and Release
+
+# 当推送形如 v2.0 / 2.0 / v2.0.1 的 tag 时触发云上编译并发布 Release
+on:
+  push:
+    tags:
+      - 'v*'
+      - '[0-9]+.[0-9]+*'
+
+permissions:
+  contents: write   # 创建 Release / 上传产物需要写权限
+
+jobs:
+  build:
+    runs-on: macos-15   # Apple Silicon (arm64) runner
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app || sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Show environment
+        run: |
+          xcodebuild -version
+          swift --version
+          uname -m
+
+      - name: Build (Release, unsigned)
+        run: |
+          set -eo pipefail
+          xcodebuild \
+            -workspace ShadowsocksX-NG.xcworkspace \
+            -scheme ShadowsocksX-NG \
+            -configuration Release \
+            -derivedDataPath build \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" \
+            clean build
+
+      - name: Package DMG
+        run: |
+          set -eo pipefail
+          APP_PATH="build/Build/Products/Release/ShadowsocksX-NG.app"
+          test -d "$APP_PATH" || { echo "App not found at $APP_PATH"; exit 1; }
+
+          VERSION="${GITHUB_REF_NAME}"
+          STAGING="dmg-staging"
+          DMG_NAME="ShadowsocksX-NG-R8-${VERSION}-arm64.dmg"
+
+          rm -rf "$STAGING"
+          mkdir -p "$STAGING"
+          cp -R "$APP_PATH" "$STAGING/"
+          ln -s /Applications "$STAGING/Applications"
+
+          hdiutil create \
+            -volname "ShadowsocksX-NG-R8 ${VERSION}" \
+            -srcfolder "$STAGING" \
+            -ov -format UDZO \
+            "$DMG_NAME"
+
+          echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
+          shasum -a 256 "$DMG_NAME" | tee "${DMG_NAME}.sha256"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.DMG_NAME }}
+            ${{ env.DMG_NAME }}.sha256
+          generate_release_notes: true
+          body: |
+            ## ShadowsocksX-NG-R8 ${{ github.ref_name }}
+
+            Apple Silicon (arm64) 构建，**未签名**。首次打开方式：
+            - 右键点击 App → 打开，或
+            - 终端执行：`xattr -dr com.apple.quarantine /Applications/ShadowsocksX-NG.app`
