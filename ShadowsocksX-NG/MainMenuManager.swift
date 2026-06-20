@@ -670,8 +670,6 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     
     func setUpMenu(_ showSpeed:Bool){
         if showSpeed{
-            speedItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-            speedItem.menu = speedMenu
             if UserDefaults.standard.bool(forKey: USERDEFAULTS_FIXED_NETWORK_SPEED_VIEW_WIDTH) {
                 self.fixedSpeedItemWidth(true)
                 self.fixedWidth.state = NSControl.StateValue.on
@@ -679,12 +677,18 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
                 self.fixedSpeedItemWidth(false)
                 self.fixedWidth.state = NSControl.StateValue.off
             }
+            // Already running: just refresh the width state, don't recreate
+            // the status item (recreating it makes the monitor disappear when
+            // the Settings window is closed).
+            if speedMonitor != nil {
+                return
+            }
+            speedItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+            speedItem.menu = speedMenu
             if let b = speedItem.button {
                 b.attributedTitle = SpeedTools.speedAttributedString(up: 0.0, down: 0.0)
             }
-            if speedMonitor == nil{
-                speedMonitor = NetSpeedMonitor()
-            }
+            speedMonitor = NetSpeedMonitor()
             if speedTimer == nil {
                 speedTimer = Timer(timeInterval: repeatTimeinterval, repeats: true) {[weak self] (timer) in
                     guard let w = self else {return}
@@ -697,6 +701,9 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
                 RunLoop.main.add(speedTimer!, forMode: RunLoop.Mode.common)
             }
         }else{
+            if speedMonitor == nil {
+                return
+            }
             speedItem.attributedTitle = NSAttributedString(string: "")
             NSStatusBar.system.removeStatusItem(speedItem)
             speedTimer?.invalidate()
