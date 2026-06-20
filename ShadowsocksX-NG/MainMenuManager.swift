@@ -16,6 +16,7 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     var subscribePreferenceWinCtrl: SubscribePreferenceWindowController!
     var toastWindowCtrl: ToastWindowController!
     var settingWindowCtrl: SettingsWindowController!
+    var userRulesWinCtrl: UserRulesController!
     
     // MARK: Outlets
     @IBOutlet weak var statusMenu: NSMenu!
@@ -429,6 +430,26 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
                 ,options: NSWorkspace.LaunchOptions.default
                 ,configuration: [NSWorkspace.LaunchConfigurationKey.arguments: "~/Library/Logs/ss-local.log"])
         }
+    }
+
+    @IBAction func editUserRules(_ sender: NSMenuItem) {
+        if userRulesWinCtrl != nil {
+            userRulesWinCtrl.close()
+        }
+        let ctrl = UserRulesController()
+        userRulesWinCtrl = ctrl
+
+        ctrl.showWindow(self)
+        NSApp.activate(ignoringOtherApps: true)
+        ctrl.window?.makeKeyAndOrderFront(self)
+    }
+
+    @IBAction func updateGFWListPAC(_ sender: NSMenuItem) {
+        UpdatePACFromGFWList {}
+    }
+
+    @IBAction func updateACLList(_ sender: NSMenuItem) {
+        UpdateACL {}
     }
 
     @IBAction func tapSetting(_ sender: NSMenuItem) {

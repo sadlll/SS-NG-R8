@@ -63,6 +63,7 @@
 		BE76C2CC24277EAC00FB3516 /* NetSpeedMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = BE76C2CB24277EAC00FB3516 /* NetSpeedMonitor.m */; };
 		BEAA0EDD244B273A00809ADD /* MainMenuManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAA0EDC244B273A00809ADD /* MainMenuManager.swift */; };
 		BEAE65F02471614900995D48 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAE65EE2471614900995D48 /* SettingsWindowController.swift */; };
+		BEAE65F12471614900995D49 /* UserRulesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAE65EF2471614900995D49 /* UserRulesController.swift */; };
 		C6D429931DA75988002A5711 /* install_privoxy.sh in Resources */ = {isa = PBXBuildFile; fileRef = C6D4298E1DA75988002A5711 /* install_privoxy.sh */; };
 		C6D429941DA75988002A5711 /* privoxy in Resources */ = {isa = PBXBuildFile; fileRef = C6D4298F1DA75988002A5711 /* privoxy */; };
 		C6D429951DA75988002A5711 /* reload_conf_privoxy.sh in Resources */ = {isa = PBXBuildFile; fileRef = C6D429901DA75988002A5711 /* reload_conf_privoxy.sh */; };
@@ -198,6 +199,7 @@
 		BE76C2CB24277EAC00FB3516 /* NetSpeedMonitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NetSpeedMonitor.m; sourceTree = "<group>"; };
 		BEAA0EDC244B273A00809ADD /* MainMenuManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuManager.swift; sourceTree = "<group>"; };
 		BEAE65EE2471614900995D48 /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
+		BEAE65EF2471614900995D49 /* UserRulesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRulesController.swift; sourceTree = "<group>"; };
 		BEFD0E63246441E600DA6510 /* Configure.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Configure.h; sourceTree = "<group>"; };
 		C6D4298E1DA75988002A5711 /* install_privoxy.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = install_privoxy.sh; sourceTree = "<group>"; };
 		C6D4298F1DA75988002A5711 /* privoxy */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = privoxy; sourceTree = "<group>"; };
@@ -367,6 +369,7 @@
 				E8CD016B23726D14006CB1F6 /* ToastWindowController.swift */,
 				E8CD016D23726D6C006CB1F6 /* ToastWindowController.xib */,
 				BEAE65EE2471614900995D48 /* SettingsWindowController.swift */,
+				BEAE65EF2471614900995D49 /* UserRulesController.swift */,
 				BE5F99312472C3F40087A065 /* SettingsWindowController.xib */,
 			);
 			name = UI;
@@ -621,6 +624,7 @@
 				9B3FFF321D08CEE40019A709 /* SWBQRCodeWindowController.m in Sources */,
 				08BDBB481E2361BD00C4BBC2 /* VersionChecker.swift in Sources */,
 				BEAE65F02471614900995D48 /* SettingsWindowController.swift in Sources */,
+				BEAE65F12471614900995D49 /* UserRulesController.swift in Sources */,
 				083BF8371D82742200831C68 /* PingClient.swift in Sources */,
 				E8B5698A2456C900001DA9A7 /* Network.swift in Sources */,
 				BE492025242F412900A6C78E /* tcping.swift in Sources */,

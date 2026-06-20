@@ -89,6 +89,37 @@
                         </items>
                     </menu>
                 </menuItem>
+                <menuItem title="Proxy Settings" id="prx-st-001">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Proxy Settings" id="prx-st-002">
+                        <items>
+                            <menuItem title="Update PAC from GFW List" id="prx-st-003">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="updateGFWListPAC:" target="Voe-Tx-rLC" id="prx-st-004"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Update All White List" id="prx-st-005">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="updateACLList:" target="Voe-Tx-rLC" id="prx-st-006"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Edit PAC User Rules..." id="prx-st-007">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="editUserRules:" target="Voe-Tx-rLC" id="prx-st-008"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Advanced Settings..." id="prx-st-009">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="tapSetting:" target="Voe-Tx-rLC" id="prx-st-010"/>
+                                </connections>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
                 <menuItem isSeparatorItem="YES" id="X5a-zf-B8u"/>
                 <menuItem title="Servers" id="u5M-hQ-VSc">
                     <modifierMask key="keyEquivalentModifierMask" shift="YES"/>

@@ -105,6 +105,23 @@
 
 "It's failed to update PAC by User Rules." = "按用户规则更新PAC失败";
 
+"User Rules" = "用户规则";
+
+"Proxy Settings" = "代理设置";
+
+"Update PAC from GFW List" = "从 GFW List 更新 PAC";
+
+"Update All White List" = "更新全部白名单";
+
+"Edit PAC User Rules..." = "编辑 PAC 用户自定规则...";
+
+"Advanced Settings..." = "高级设置...";
+
+"OK" = "确定";
+
+"Cancel" = "取消";
+
+
 "Servers" = "服务器";
 
 "Export Command Copied." = "命令已复制至剪贴板";
