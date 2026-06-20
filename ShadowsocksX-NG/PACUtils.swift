@@ -105,6 +105,12 @@ func GeneratePACFile() -> Bool {
     }
     
     let socks5Port = UserDefaults.standard.integer(forKey: USERDEFAULTS_LOCAL_SOCKS5_LISTEN_PORT)
+    var socks5IP = UserDefaults.standard.string(forKey: USERDEFAULTS_LOCAL_SOCKS5_LISTEN_ADDRESS) ?? "127.0.0.1"
+    // 0.0.0.0 means "all interfaces" for the listener, but clients cannot
+    // connect to 0.0.0.0; fall back to loopback in the generated PAC proxy URL.
+    if socks5IP.isEmpty || socks5IP == "0.0.0.0" {
+        socks5IP = "127.0.0.1"
+    }
     
     do {
         let gfwlist = try String(contentsOfFile: GFWListFilePath, encoding: String.Encoding.utf8)
@@ -165,8 +171,11 @@ func GeneratePACFile() -> Bool {
                 jsStr = jsStr!.replacingOccurrences(of: "__RULES__"
                     , with: rulesJsonStr!)
                 // Replace __SOCKS5PORT__ palcholder in pac js
-                let result = jsStr!.replacingOccurrences(of: "__SOCKS5PORT__"
+                jsStr = jsStr!.replacingOccurrences(of: "__SOCKS5PORT__"
                     , with: "\(socks5Port)")
+                // Replace __SOCKS5IP__ placeholder in pac js
+                let result = jsStr!.replacingOccurrences(of: "__SOCKS5IP__"
+                    , with: socks5IP)
                 
                 // Write the pac js to file.
                 try result.data(using: String.Encoding.utf8)?

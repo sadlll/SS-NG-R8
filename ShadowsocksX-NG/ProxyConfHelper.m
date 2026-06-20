@@ -209,7 +209,15 @@ GCDWebServer *webServer = nil;
     NSString * address = [defaults stringForKey:USERDEFAULTS_PAC_SERVER_LISTEN_ADDRESS];
     int port = (short)[defaults integerForKey:USERDEFAULTS_PAC_SERVER_LISTEN_PORT];
 
-    [webServer startWithOptions:@{@"BindToLocalhost":@YES, @"Port":@(port)} error:nil];
+    if (address.length == 0) {
+        address = @"127.0.0.1";
+    }
+    // Bind to localhost only when the configured address is a loopback address;
+    // otherwise bind to all interfaces (0.0.0.0) so the PAC file is reachable
+    // from other hosts on the LAN via the configured address.
+    BOOL bindToLocalhost = [address isEqualToString:@"127.0.0.1"] || [address isEqualToString:@"localhost"];
+
+    [webServer startWithOptions:@{GCDWebServerOption_BindToLocalhost:@(bindToLocalhost), GCDWebServerOption_Port:@(port)} error:nil];
 
     return [NSString stringWithFormat:@"%@%@:%d%@",@"http://",address,port,routerPath];
 }
