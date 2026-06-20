@@ -1,4 +1,22 @@
 
+/* Class = "NSMenuItem"; title = "Proxy Settings"; ObjectID = "prx-st-001"; */
+"prx-st-001.title" = "代理设置";
+
+/* Class = "NSMenu"; title = "Proxy Settings"; ObjectID = "prx-st-002"; */
+"prx-st-002.title" = "代理设置";
+
+/* Class = "NSMenuItem"; title = "Update PAC from GFW List"; ObjectID = "prx-st-003"; */
+"prx-st-003.title" = "从 GFW List 更新 PAC";
+
+/* Class = "NSMenuItem"; title = "Update All White List"; ObjectID = "prx-st-005"; */
+"prx-st-005.title" = "更新全部白名单";
+
+/* Class = "NSMenuItem"; title = "Edit PAC User Rules..."; ObjectID = "prx-st-007"; */
+"prx-st-007.title" = "编辑 PAC 用户自定规则...";
+
+/* Class = "NSMenuItem"; title = "Advanced Settings..."; ObjectID = "prx-st-009"; */
+"prx-st-009.title" = "高级设置...";
+
 /* Class = "NSMenuItem"; title = "Import Bunch Json File"; ObjectID = "15a-D6-JJo"; */
 "15a-D6-JJo.title" = "导入服务器配置文件";
 
