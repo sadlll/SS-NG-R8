@@ -312,7 +312,7 @@ func writePrivoxyConfFile() -> Bool {
         var example = try String(contentsOfFile: examplePath!, encoding: .utf8)
         example = example.replacingOccurrences(of: "{http}", with: defaults.string(forKey: USERDEFAULTS_LOCAL_HTTP_LISTEN_ADDRESS)! + ":" + String(defaults.integer(forKey: USERDEFAULTS_LOCAL_HTTP_LISTEN_PORT)))
         example = example.replacingOccurrences(of: "{socks5}", with: defaults.string(forKey: USERDEFAULTS_LOCAL_SOCKS5_LISTEN_ADDRESS)! + ":" + String(defaults.integer(forKey: USERDEFAULTS_LOCAL_SOCKS5_LISTEN_PORT)))
-        example = example.replacingOccurrences(of: "{templatedir}", with: NSHomeDirectory() + APP_SUPPORT_DIR + "templates")
+        example = example.replacingOccurrences(of: "{templdir}", with: NSHomeDirectory() + APP_SUPPORT_DIR + "templates")
         let data = example.data(using: .utf8)
         
         let filepath = NSHomeDirectory() + APP_SUPPORT_DIR + "privoxy.config"
