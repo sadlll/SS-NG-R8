@@ -43,7 +43,8 @@ final class ProbeCancellation {
 enum BoundedCommand {
     /// File-backed stdout avoids pipe capacity deadlocks with large overlay status responses.
     static func run(_ executable: String, arguments: [String], timeout: TimeInterval,
-                    cancellation: ProbeCancellation = ProbeCancellation()) -> CommandResult {
+                    cancellation: ProbeCancellation = ProbeCancellation(),
+                    environment: [String: String]? = nil) -> CommandResult {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("ss-probe-command-" + UUID().uuidString)
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false,
@@ -56,6 +57,7 @@ enum BoundedCommand {
             let task = Process()
             task.executableURL = URL(fileURLWithPath: executable)
             task.arguments = arguments
+            task.environment = environment
             task.standardOutput = output
             task.standardError = FileHandle.nullDevice
             let ended = DispatchSemaphore(value: 0)

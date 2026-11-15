@@ -2,6 +2,29 @@ import XCTest
 @testable import ProxyDiagnostics
 
 final class DiagnosticsTests: XCTestCase {
+    func testTailscaleStatusForcesCLIInFinderEnvironment() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let executable = directory.appendingPathComponent("Tailscale app")
+        let script = """
+        #!/bin/sh
+        if [ "$TAILSCALE_BE_CLI" != "1" ]; then
+          echo 'The Tailscale GUI failed to start: (Tailscale.CLIError error 3.)'
+          exit 0
+        fi
+        [ "$1" = "status" ] && [ "$2" = "--json" ] || exit 1
+        printf '{"BackendState":"Running","Peer":{},"Inherited":"%s"}' "$PROBE_TEST_MARKER"
+        """
+        try script.write(to: executable, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: executable.path)
+        // Finder supplies no SHLVL, TERM, TERM_PROGRAM or PS1. Override even an inherited opt-out.
+        let finderEnvironment = ["PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "PROBE_TEST_MARKER": "preserved", "TAILSCALE_BE_CLI": "0"]
+        let status = OverlayInspector.tailscaleStatus(executable: executable.path, environment: finderEnvironment)
+        XCTAssertEqual(status?["BackendState"] as? String, "Running")
+        XCTAssertEqual(status?["Inherited"] as? String, "preserved")
+    }
+
     func testNewFailureReplacesCachedSuccessAndAnEditedProfileRejectsOldResults() {
         var state = ProfileProxyTestState()
         let original: [String: Any] = ["server": "example.com", "password": "first"]

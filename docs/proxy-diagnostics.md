@@ -8,6 +8,8 @@
 - ZeroTier：按路由接口、网络和邻居 MAC 对应到节点 ID，再读取该节点的实际路径。请求成功但没有活动直连路径时显示“中继”。路由网关、桥接、缺少映射等情况显示“路径未知”。
 - 普通网络：通过普通接口成功连接服务器时显示“直连”；其他 VPN 接口或含混的多地址结果显示“路径未知”。
 
+Tailscale 查询显式设置子进程环境变量 `TAILSCALE_BE_CLI=1`，确保从 Finder、Dock 或登录启动时也使用 CLI 模式；不会修改全局环境或 Tailscale 配置。参见 [Tailscale 官方 CLI 说明](https://tailscale.com/docs/reference/tailscale-cli?tab=macos)。
+
 ## macOS 27 的 ZeroTier 节点关联
 
 macOS 27 会对缺少 Network Topology Observation 签名能力的程序隐藏 ARP 数据。这个项目可生成未公证的本地构建，因此提供不依赖 ARP 的显式关联：

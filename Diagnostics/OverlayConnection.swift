@@ -77,6 +77,18 @@ final class OverlayInspector {
 
     init(cancellation: ProbeCancellation = ProbeCancellation()) { self.cancellation = cancellation }
 
+    static func tailscaleStatus(executable: String, cancellation: ProbeCancellation = ProbeCancellation(),
+                                environment: [String: String] = ProcessInfo.processInfo.environment) -> [String: Any]? {
+        // macOS bundles CLI and GUI in one executable. Finder lacks the shell variables used
+        // for mode detection; without this override it can return GUI error text with exit 0.
+        var cliEnvironment = environment
+        cliEnvironment["TAILSCALE_BE_CLI"] = "1"
+        let result = BoundedCommand.run(executable, arguments: ["status", "--json"], timeout: 3,
+                                       cancellation: cancellation, environment: cliEnvironment)
+        guard result.status == 0, !result.timedOut, let data = result.output.data(using: .utf8) else { return nil }
+        return (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+    }
+
     private func command(_ path: String, _ arguments: [String]) -> String? {
         let result = BoundedCommand.run(path, arguments: arguments, timeout: 3, cancellation: cancellation)
         return result.status == 0 && !result.timedOut ? result.output : nil
@@ -108,7 +120,7 @@ final class OverlayInspector {
         guard !addresses.isEmpty else { return unknown }
 
         let tailscaleCLI = executable(["/Applications/Tailscale.app/Contents/MacOS/Tailscale", "/opt/homebrew/bin/tailscale", "/usr/local/bin/tailscale"])
-        let status = json(tailscaleCLI, ["status", "--json"]) as? [String: Any]
+        let status = tailscaleCLI.flatMap { Self.tailscaleStatus(executable: $0, cancellation: cancellation) }
         let peers = status?["BackendState"] as? String == "Running"
             ? ((status?["Peer"] as? [String: [String: Any]])?.values.map { $0 } ?? []) : []
         let zeroTierCLI = executable(["/usr/local/bin/zerotier-cli", "/opt/homebrew/bin/zerotier-cli"])
