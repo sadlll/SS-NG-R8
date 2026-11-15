@@ -1,24 +1,71 @@
 import Foundation
 import Darwin
 
+enum OverlayTransport: String {
+    case udp = "UDP", tcp = "TCP", unknown = ""
+}
+
 struct OverlayConnection {
     let kind: ConnectionKind
     let source: String
+    var transport: OverlayTransport = .unknown
+    var isLAN = false
+
+    var badge: String {
+        switch kind {
+        case .unknown: return "UNKNOWN"
+        case .relay: return transport == .unknown ? "RELAY" : transport.rawValue + " RELAY"
+        case .direct:
+            if isLAN { return transport == .unknown ? "LAN" : transport.rawValue + " LAN" }
+            if transport == .udp { return "UDP P2P" }
+            return transport == .tcp ? "TCP DIRECT" : "DIRECT"
+        }
+    }
+
+    var localizedDescription: String {
+        return kind == .direct && isLAN ? NSLocalizedString("LAN direct", comment: "Connection path") : kind.title
+    }
+
+    /// LAN requires an on-link route over Ethernet/Wi-Fi. A private/overlay IP alone is not evidence.
+    static func isLANRoute(_ route: String) -> Bool {
+        let lines = route.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }
+        guard let interface = lines.first(where: { $0.hasPrefix("interface:") })?.split(separator: ":", maxSplits: 1).last?.trimmingCharacters(in: .whitespaces),
+              interface.hasPrefix("en"), interface.count > 2, interface.dropFirst(2).allSatisfy({ $0.isNumber }),
+              let flagsLine = lines.first(where: { $0.hasPrefix("flags:") }),
+              let start = flagsLine.firstIndex(of: "<"), let end = flagsLine.firstIndex(of: ">"), start < end else { return false }
+        let flags = Set(flagsLine[flagsLine.index(after: start)..<end].split(separator: ",").map(String.init))
+        return flags.contains("UP") && flags.isDisjoint(with: ["GATEWAY", "REJECT", "BLACKHOLE"])
+    }
+
+    static func endpointHost(_ endpoint: String) -> String? {
+        let candidate: String
+        if endpoint.hasPrefix("["), let end = endpoint.firstIndex(of: "]") {
+            candidate = String(endpoint[endpoint.index(after: endpoint.startIndex)..<end])
+        } else if let slash = endpoint.lastIndex(of: "/") {
+            candidate = String(endpoint[..<slash])
+        } else if sameIP(endpoint, endpoint) {
+            candidate = endpoint
+        } else if let colon = endpoint.lastIndex(of: ":") {
+            candidate = String(endpoint[..<colon])
+        } else { return nil }
+        let numeric = candidate.split(separator: "%", maxSplits: 1).first.map(String.init) ?? ""
+        return sameIP(numeric, numeric) ? candidate : nil
+    }
 
     static func tailscale(_ peer: [String: Any]) -> OverlayConnection {
         let unknown = OverlayConnection(kind: .unknown, source: "Tailscale")
         guard peer["Online"] as? Bool == true else { return unknown }
         if let relay = peer["PeerRelay"] as? String, !relay.isEmpty {
-            return OverlayConnection(kind: .relay, source: "Tailscale Peer Relay")
+            return OverlayConnection(kind: .relay, source: "Tailscale Peer Relay", transport: .udp)
         }
         if let relay = peer["PeerRelay"] as? [String: Any], !relay.isEmpty {
-            return OverlayConnection(kind: .relay, source: "Tailscale Peer Relay")
+            return OverlayConnection(kind: .relay, source: "Tailscale Peer Relay", transport: .udp)
         }
         if let endpoint = peer["CurAddr"] as? String, !endpoint.isEmpty {
-            return OverlayConnection(kind: .direct, source: "Tailscale")
+            return OverlayConnection(kind: .direct, source: "Tailscale", transport: .udp)
         }
         if peer["Active"] as? Bool == true, let relay = peer["Relay"] as? String, !relay.isEmpty {
-            return OverlayConnection(kind: .relay, source: "Tailscale DERP (\(relay))")
+            return OverlayConnection(kind: .relay, source: "Tailscale DERP (\(relay))", transport: .tcp)
         }
         return unknown
     }
@@ -28,7 +75,7 @@ struct OverlayConnection {
         let paths = peer["paths"] as? [[String: Any]] ?? []
         if paths.contains(where: { $0["active"] as? Bool == true && $0["expired"] as? Bool == false
             && !($0["address"] as? String ?? "").isEmpty }) {
-            return OverlayConnection(kind: .direct, source: "ZeroTier")
+            return OverlayConnection(kind: .direct, source: "ZeroTier", transport: .udp)
         }
         // No path alone also describes an offline node; a successful request establishes reachability.
         return OverlayConnection(kind: reachable ? .relay : .unknown, source: "ZeroTier")
@@ -103,6 +150,12 @@ final class OverlayInspector {
         return paths.first { FileManager.default.isExecutableFile(atPath: $0) }
     }
 
+    private func isLANEndpoint(_ endpoint: String) -> Bool {
+        guard let address = OverlayConnection.endpointHost(endpoint),
+              let route = command("/sbin/route", ["-n", "get", address]) else { return false }
+        return OverlayConnection.isLANRoute(route)
+    }
+
     func inspect(host: String, reachable: Bool, zeroTierPeerID: String = "") -> OverlayConnection {
         let unknown = OverlayConnection(kind: .unknown, source: "")
         guard !host.isEmpty, !cancellation.isCancelled else { return unknown }
@@ -131,7 +184,9 @@ final class OverlayInspector {
             if let peer = peers.first(where: { peer in
                 (peer["TailscaleIPs"] as? [String] ?? []).contains { OverlayConnection.sameIP(address, $0) }
             }) {
-                observations.append(OverlayConnection.tailscale(peer))
+                var connection = OverlayConnection.tailscale(peer)
+                if connection.kind == .direct { connection.isLAN = isLANEndpoint(peer["CurAddr"] as? String ?? "") }
+                observations.append(connection)
                 continue
             }
             guard let route = command("/sbin/route", ["-n", "get", address]),
@@ -150,17 +205,28 @@ final class OverlayInspector {
                 if let node = OverlayConnection.zeroTierPeerID(override: zeroTierPeerID, mac: neighbor,
                                                                networkID: networkID, peers: zeroTierPeers ?? []),
                    let peer = zeroTierPeers?.first(where: { $0["address"] as? String == node }) {
-                    let connection = OverlayConnection.zeroTier(peer, reachable: reachable)
-                    observations.append(OverlayConnection(kind: connection.kind, source: "ZeroTier (\(node))"))
+                    var connection = OverlayConnection.zeroTier(peer, reachable: reachable)
+                    if connection.kind == .direct {
+                        let active = (peer["paths"] as? [[String: Any]] ?? []).filter {
+                            $0["active"] as? Bool == true && $0["expired"] as? Bool == false
+                        }
+                        // Multiple active physical paths cannot establish which one carries this request.
+                        if active.count == 1 { connection.isLAN = isLANEndpoint(active[0]["address"] as? String ?? "") }
+                    }
+                    observations.append(OverlayConnection(kind: connection.kind, source: "ZeroTier (\(node))",
+                                                          transport: connection.transport, isLAN: connection.isLAN))
                 } else { observations.append(OverlayConnection(kind: .unknown, source: "ZeroTier")) }
             } else if interface.hasPrefix("utun") || interface.hasPrefix("feth") || interface.hasPrefix("zt") {
                 observations.append(unknown)
             } else {
-                observations.append(OverlayConnection(kind: reachable ? .direct : .unknown, source: "TCP"))
+                observations.append(OverlayConnection(kind: reachable ? .direct : .unknown, source: "TCP", transport: .tcp,
+                                                      isLAN: OverlayConnection.isLANRoute(route)))
             }
         }
         // A dual-stack hostname may use either route. Mixed evidence cannot identify the actual path.
-        guard let first = observations.first, observations.allSatisfy({ $0.kind == first.kind && $0.source == first.source }) else { return unknown }
+        guard var first = observations.first,
+              observations.allSatisfy({ $0.kind == first.kind && $0.source == first.source && $0.transport == first.transport }) else { return unknown }
+        first.isLAN = observations.allSatisfy { $0.isLAN }
         return first
     }
 

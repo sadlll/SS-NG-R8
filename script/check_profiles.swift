@@ -34,9 +34,9 @@ enum CheckProfiles {
         batch.start(configurations: configurations, helperURL: helper, update: { index, result in
             let host = profiles[index]["ServerHost"] as? String ?? ""
             let delay = result.latency.map { String(format: "%.3f ms", $0) } ?? "failed"
-            print("\(host): \(delay) · \(result.connection.kind.rawValue) (\(result.connection.source))")
+            print("\(host): \(delay) · \(result.connection.badge) (\(result.connection.source))")
             rows.append(["host": host, "latency_ms": result.latency as Any? ?? NSNull(),
-                         "path": result.connection.kind.rawValue, "source": result.connection.source,
+                         "path": result.connection.kind.rawValue, "badge": result.connection.badge, "source": result.connection.source,
                          "failure": result.failure?.rawValue as Any? ?? NSNull()])
         }, completion: { completed = true })
         let deadline = Date().addingTimeInterval(180)

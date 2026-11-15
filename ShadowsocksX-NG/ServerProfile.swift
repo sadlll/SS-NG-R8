@@ -44,14 +44,14 @@ import Cocoa
         guard let result = currentProxyTestResult else { return "" }
         let delay = result.latency.map { NumberFormatter.three(NSNumber(value: $0)) + " ms" }
             ?? "Request failed".localized
-        return delay + " · " + result.connection.kind.title
+        return delay + " · " + result.connection.badge
     }
 
     var proxyTestTooltip: String? {
         guard let result = currentProxyTestResult else { return nil }
         let date = DateFormatter.localizedString(from: result.testedAt, dateStyle: .short, timeStyle: .medium)
-        let path = result.connection.source.isEmpty ? result.connection.kind.title
-            : result.connection.source + " · " + result.connection.kind.title
+        let description = result.connection.badge + " · " + result.connection.localizedDescription
+        let path = result.connection.source.isEmpty ? description : result.connection.source + " · " + description
         return ["Proxy HTTPS request latency".localized, ProxyProbe.target, date, path, result.failure?.title]
             .compactMap { $0 }.joined(separator: "\n")
     }

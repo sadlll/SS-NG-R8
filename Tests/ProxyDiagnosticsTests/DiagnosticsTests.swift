@@ -2,6 +2,40 @@ import XCTest
 @testable import ProxyDiagnostics
 
 final class DiagnosticsTests: XCTestCase {
+    func testBadgesDistinguishDirectUDPAndRelayProtocols() {
+        XCTAssertEqual(OverlayConnection.tailscale(["Online": true, "Active": true, "CurAddr": "203.0.113.7:41641", "Relay": "tok"]).badge, "UDP P2P")
+        XCTAssertEqual(OverlayConnection.tailscale(["Online": true, "Active": true, "Relay": "tok"]).badge, "TCP RELAY")
+        XCTAssertEqual(OverlayConnection.tailscale(["Online": true, "PeerRelay": "relay-node"]).badge, "UDP RELAY")
+        XCTAssertEqual(OverlayConnection.zeroTier(["role": "LEAF", "paths": []], reachable: true).badge, "RELAY")
+        XCTAssertEqual(OverlayConnection.zeroTier(["role": "LEAF", "paths": []], reachable: false).badge, "UNKNOWN")
+        XCTAssertEqual(OverlayConnection(kind: .unknown, source: "", transport: .udp, isLAN: true).badge, "UNKNOWN")
+        XCTAssertEqual(OverlayConnection(kind: .direct, source: "TCP", transport: .tcp, isLAN: true).badge, "TCP LAN")
+        XCTAssertEqual(OverlayConnection(kind: .direct, source: "TCP", transport: .tcp).badge, "TCP DIRECT")
+    }
+
+    func testLANRequiresPhysicalOnLinkRouteInsteadOfPrivateOrOverlayAddress() {
+        let onLink = "destination: 192.168.0.66\ninterface: en1\nflags: <UP,HOST,DONE,LLINFO,IFSCOPE>"
+        XCTAssertTrue(OverlayConnection.isLANRoute(onLink))
+        XCTAssertFalse(OverlayConnection.isLANRoute(onLink.replacingOccurrences(of: "en1", with: "utun4")))
+        XCTAssertFalse(OverlayConnection.isLANRoute(onLink.replacingOccurrences(of: "en1", with: "feth1710")))
+        XCTAssertFalse(OverlayConnection.isLANRoute(onLink.replacingOccurrences(of: "en1", with: "bridge0")))
+        XCTAssertFalse(OverlayConnection.isLANRoute(onLink.replacingOccurrences(of: "UP,HOST", with: "UP,GATEWAY,HOST")))
+        XCTAssertFalse(OverlayConnection.isLANRoute(onLink.replacingOccurrences(of: "UP,HOST", with: "UP,REJECT,HOST")))
+        XCTAssertFalse(OverlayConnection.isLANRoute("interface: en1"))
+        XCTAssertFalse(OverlayConnection.isLANRoute("interface: en\nflags: <UP,HOST>"))
+        XCTAssertTrue(OverlayConnection.isLANRoute("destination: fe80::1\ninterface: en0\nflags: <UP,HOST,DONE>"))
+    }
+
+    func testPhysicalEndpointParsingSupportsTailscaleAndZeroTierIPv6() {
+        XCTAssertEqual(OverlayConnection.endpointHost("192.168.0.66:41641"), "192.168.0.66")
+        XCTAssertEqual(OverlayConnection.endpointHost("[2001:db8::1]:41641"), "2001:db8::1")
+        XCTAssertEqual(OverlayConnection.endpointHost("[fe80::1%en0]:41641"), "fe80::1%en0")
+        XCTAssertEqual(OverlayConnection.endpointHost("192.168.0.66/9993"), "192.168.0.66")
+        XCTAssertEqual(OverlayConnection.endpointHost("2001:db8::1/9993"), "2001:db8::1")
+        XCTAssertNil(OverlayConnection.endpointHost("invalid:41641"))
+        XCTAssertNil(OverlayConnection.endpointHost(""))
+    }
+
     func testTailscaleStatusForcesCLIInFinderEnvironment() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
