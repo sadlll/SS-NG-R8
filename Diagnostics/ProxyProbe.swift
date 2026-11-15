@@ -57,7 +57,9 @@ enum BoundedCommand {
             let task = Process()
             task.executableURL = URL(fileURLWithPath: executable)
             task.arguments = arguments
-            task.environment = environment
+            // Setting nil explicitly clears the child environment on macOS. Leave the
+            // property untouched to inherit HOME and the CLI's local authentication context.
+            if let environment = environment { task.environment = environment }
             task.standardOutput = output
             task.standardError = FileHandle.nullDevice
             let ended = DispatchSemaphore(value: 0)

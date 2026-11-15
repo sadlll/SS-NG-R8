@@ -32,7 +32,7 @@ rm -rf ~/Library/Caches/com.qiuyuzhou.ShadowsocksX-NG
 
 # ShadowsocksX-NG-R
 
-Current version is [2.0.3](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.0.3)
+Current version is [2.0.4](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.0.4)
 
 当前发行包适用于 Apple Silicon、macOS 14 或更新版本。服务器测试已改为真实 HTTPS 代理请求，并显示直连/中继状态。详见[代理测试说明](docs/proxy-diagnostics.md)。
 

@@ -2,6 +2,19 @@ import XCTest
 @testable import ProxyDiagnostics
 
 final class DiagnosticsTests: XCTestCase {
+    func testCommandInheritsEnvironmentUnlessExplicitlyOverridden() {
+        let key = "SS_NG_INHERIT_" + UUID().uuidString.replacingOccurrences(of: "-", with: "")
+        setenv(key, "inherited-context", 1)
+        defer { unsetenv(key) }
+        let inherited = BoundedCommand.run("/usr/bin/printenv", arguments: [key], timeout: 2)
+        XCTAssertEqual(inherited.status, 0)
+        XCTAssertEqual(inherited.output.trimmingCharacters(in: .whitespacesAndNewlines), "inherited-context")
+        let overridden = BoundedCommand.run("/usr/bin/printenv", arguments: [key], timeout: 2,
+                                            environment: [key: "explicit-context"])
+        XCTAssertEqual(overridden.status, 0)
+        XCTAssertEqual(overridden.output.trimmingCharacters(in: .whitespacesAndNewlines), "explicit-context")
+    }
+
     func testBadgesDistinguishDirectUDPAndRelayProtocols() {
         XCTAssertEqual(OverlayConnection.tailscale(["Online": true, "Active": true, "CurAddr": "203.0.113.7:41641", "Relay": "tok"]).badge, "UDP P2P")
         XCTAssertEqual(OverlayConnection.tailscale(["Online": true, "Active": true, "Relay": "tok"]).badge, "TCP RELAY")
