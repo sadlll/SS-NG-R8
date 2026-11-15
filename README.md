@@ -32,9 +32,9 @@ rm -rf ~/Library/Caches/com.qiuyuzhou.ShadowsocksX-NG
 
 # ShadowsocksX-NG-R
 
-Current version is 1.7.2
+Current version is [2.0.1](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.0.1)
 
-Continuesly release under 1.7.2
+当前发行包适用于 Apple Silicon、macOS 14 或更新版本。服务器测试已改为真实 HTTPS 代理请求，并显示直连/中继状态。详见[代理测试说明](docs/proxy-diagnostics.md)。
 
 [![Build Status](https://travis-ci.org/shadowsocksr/ShadowsocksX-NG.svg?branches=develop)](https://travis-ci.org/shadowsocksr/ShadowsocksX-NG)
 [![Swift](https://img.shields.io/badge/swift-5.2-orange.svg)](https://www.python.org/downloads/)
@@ -69,7 +69,7 @@ Then I rewrite the GUI code by swift.
 
 ### Running
 
-- macOS 10.12 +
+- 当前发行包：Apple Silicon（arm64），macOS 14 +
 
 ### Building
 

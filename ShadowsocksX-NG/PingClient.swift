@@ -1,157 +1,58 @@
-//
-//  PingClient.swift
-//  ShadowsocksX-R
-//
-//  Created by 称一称 on 16/9/5.
-//  Copyright © 2016年 qiuyuzhou. All rights reserved.
-//
-
-
 import Foundation
 
-fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-  switch (lhs, rhs) {
-  case let (l?, r?):
-    return l < r
-  case (nil, _?):
-    return true
-  default:
-    return false
-  }
-}
+var isTesting = false
+var neverSpeedTestBefore = true
 
-public typealias SimplePingClientCallback = (String?)->()
+final class ConnectTestigManager {
+    static let shared = ConnectTestigManager()
+    private var batch: ProxyTestBatch?
 
-var isTesting:Bool = false
-var neverSpeedTestBefore:Bool = true
-
-class PingServers:NSObject{
-    
-    func runCommand(cmd : String, args : String...) -> (output: [String], error: [String], exitCode: Int32) {
-        
-        var output : [String] = []
-        var error : [String] = []
-        
-        let task = Process()
-        task.launchPath = cmd
-        task.arguments = args
-        
-        let outpipe = Pipe()
-        task.standardOutput = outpipe
-        let errpipe = Pipe()
-        task.standardError = errpipe
-        
-        task.launch()
-        
-        let outdata = outpipe.fileHandleForReading.readDataToEndOfFile()
-        if var string = String(data: outdata, encoding: .utf8) {
-            string = string.trimmingCharacters(in: .newlines)
-            output = string.components(separatedBy: "\n")
-        }
-        
-        let errdata = errpipe.fileHandleForReading.readDataToEndOfFile()
-        if var string = String(data: errdata, encoding: .utf8) {
-            string = string.trimmingCharacters(in: .newlines)
-            error = string.components(separatedBy: "\n")
-        }
-        
-        task.waitUntilExit()
-        let status = task.terminationStatus
-        
-        return (output, error, status)
-    }
-    
-    func getlatencyFromString(result:String) -> Double?{
-        var res = result
-        if !result.contains("round-trip min/avg/max/stddev =") {
-            return nil
-        }
-        res.removeSubrange(res.range(of: "round-trip min/avg/max/stddev = ")!)
-        res = String(res.dropLast(3))
-        res = res.components(separatedBy: "/")[1]
-        let latency = Double(res)
-        return latency
-    }
-    
-    func ping(finish: @escaping ()->()){
-        let SerMgr = ServerProfileManager.instance
-        if SerMgr.profiles.count <= 0 {
-            finish()
+    func start() {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { self.start() }
             return
         }
-        
+        guard !isTesting else { return }
+        let profiles = ServerProfileManager.instance.profiles
+        guard !profiles.isEmpty else { return }
+        let configurations = profiles.map { $0.proxyTestConfiguration() }
+        let ids = profiles.map { $0.uuid }
+        for (profile, configuration) in zip(profiles, configurations) {
+            profile.proxyTestState.begin(configuration: configuration)
+            profile.latency = NSNumber(value: Double.infinity)
+        }
         neverSpeedTestBefore = false
-        
-        let group = DispatchGroup()
-        let queue = DispatchQueue.global(qos: DispatchQoS.QoSClass.userInteractive)
-        for i in 0..<SerMgr.profiles.count {
-            group.enter()
-            queue.async {
-                if let outputString = self.runCommand(cmd: "/sbin/ping", args: "-c","5","-t","2",SerMgr.profiles[i].serverHost).output.last {
-                    if let latency = self.getlatencyFromString(result: outputString) {
-                        SerMgr.profiles[i].latency = NSNumber(value: latency)
-                    }
-                }
-                group.leave()
-            }
-        }
-        group.notify(queue: DispatchQueue.main) {
-            var fastID = 0
-            var fastTime = Double.infinity
-            
-            for k in 0..<SerMgr.profiles.count {
-                let latency = SerMgr.profiles[k].latency.doubleValue
-                if latency < fastTime {
-                    fastTime = latency
-                    fastID = k
-                }
-            }
-            
-            if fastTime != Double.infinity {
-                let ft = NumberFormatter.three(SerMgr.profiles[fastID].latency)
-                postUserNotification(
-                    title: "ICMP测试完成！最快\(ft)ms",
-                    subtitle: "最快的是\(SerMgr.profiles[fastID].serverHost) \(SerMgr.profiles[fastID].remark)")
+        isTesting = true
+        UserDefaults.standard.removeObject(forKey: USERDEFAULTS_FASTEST_NODE)
+        NotificationCenter.default.post(name: NOTIFY_UPDATE_MAINMENU, object: nil)
 
-                UserDefaults.standard.setValue("\(ft)", forKey: USERDEFAULTS_FASTEST_NODE)
-                UserDefaults.standard.synchronize()
-                
-                DispatchQueue.main.async {
-                    finish()
-                }
+        let installed = URL(fileURLWithPath: NSHomeDirectory() + APP_SUPPORT_DIR + "ss-local")
+        let helper = FileManager.default.isExecutableFile(atPath: installed.path) ? installed
+            : (Bundle.main.url(forResource: "ss-local", withExtension: nil) ?? installed)
+        let batch = ProxyTestBatch()
+        self.batch = batch
+        batch.start(configurations: configurations, helperURL: helper, update: { index, result in
+            // Sorting/subscriptions may replace the original profile objects or their array positions.
+            if let profile = ServerProfileManager.instance.profiles.first(where: { $0.uuid == ids[index] }) {
+                profile.proxyTestState.complete(result: result, configuration: configurations[index], current: profile.proxyTestConfiguration())
+                profile.latency = NSNumber(value: profile.currentProxyTestResult?.latency ?? .infinity)
             }
-        }
-    }
-    
-    deinit {
-        print("&&&&& PingServers deinit &&&&&")
-    }
-}
-
-class ConnectTestigManager {
-    static let shared = ConnectTestigManager()
-    
-    private var tcping: Tcping?
-    private var ping: PingServers?
-    
-    func start() {
-        if !isTesting {
-            isTesting = true
-            if UserDefaults.standard.bool(forKey: USERDEFAULTS_TCP) {
-                self.tcping = Tcping()
-                self.tcping!.ping {
-                    isTesting = false
-                    NotificationCenter.default.post(name: NOTIFY_UPDATE_MAINMENU, object: nil)
-                    self.tcping = nil
-                }
+            NotificationCenter.default.post(name: NOTIFY_UPDATE_MAINMENU, object: nil)
+        }, completion: {
+            isTesting = false
+            self.batch = nil
+            let valid = ServerProfileManager.instance.profiles.filter { $0.currentProxyTestResult?.latency != nil }
+            if let fastest = valid.min(by: { $0.latency.doubleValue < $1.latency.doubleValue }) {
+                let time = NumberFormatter.three(fastest.latency)
+                UserDefaults.standard.set(time, forKey: USERDEFAULTS_FASTEST_NODE)
+                postUserNotification(title: "Proxy test completed".localized + " · \(time) ms", subtitle: fastest.title())
             } else {
-                self.ping = PingServers()
-                self.ping!.ping {
-                    isTesting = false
-                    NotificationCenter.default.post(name: NOTIFY_UPDATE_MAINMENU, object: nil)
-                    self.ping = nil
-                }
+                UserDefaults.standard.removeObject(forKey: USERDEFAULTS_FASTEST_NODE)
+                postUserNotification(title: "Proxy test completed".localized, subtitle: "No proxy request succeeded".localized)
             }
-        }
+            NotificationCenter.default.post(name: NOTIFY_UPDATE_MAINMENU, object: nil)
+        })
     }
+
+    func cancel() { batch?.cancel() }
 }

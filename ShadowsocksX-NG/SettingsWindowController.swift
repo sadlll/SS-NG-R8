@@ -48,7 +48,10 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTableVie
         launchAtLoginButton.state = AppDelegate.getLauncherStatus() ? .on:.off
         
         let d = UserDefaults.standard
-        delayTestMethod.stringValue = d.bool(forKey: USERDEFAULTS_TCP) ? "TCP":"ICMP"
+        delayTestMethod.removeAllItems()
+        delayTestMethod.addItem(withObjectValue: "HTTPS proxy request".localized)
+        delayTestMethod.selectItem(at: 0)
+        delayTestMethod.isEnabled = false
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -132,10 +135,6 @@ class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTableVie
     }
     
     func windowWillClose(_ notification: Notification) {
-        let d = UserDefaults.standard
-               d.setValue(delayTestMethod.stringValue == "TCP" ? true:false, forKey: USERDEFAULTS_TCP)
-               d.synchronize()
-               
         AppDelegate.setLauncherStatus(open: launchAtLoginButton.state == .on ? true:false)
         NotificationCenter.default.post(name: NOTIFY_SETTING_UPDATE, object: nil)
     }

@@ -24,8 +24,37 @@ import Cocoa
     var ssrObfs:String = "plain"
     var ssrObfsParam:String = ""
     var ssrGroup: String = ""
+    var zeroTierPeerID: String = ""
     
     var latency = NSNumber(value: Double.infinity)
+    @nonobjc var proxyTestState = ProfileProxyTestState()
+
+    @nonobjc var currentProxyTestResult: ProxyTestResult? {
+        return proxyTestState.currentResult(configuration: proxyTestConfiguration())
+    }
+
+    func proxyTestConfiguration() -> [String: Any] {
+        var configuration = toJsonConfig() as [String: Any]
+        configuration["_diagnostic_zerotier_peer"] = zeroTierPeerID
+        return configuration
+    }
+
+    var proxyTestSummary: String {
+        if proxyTestState.isTesting { return "Testing proxy…".localized }
+        guard let result = currentProxyTestResult else { return "" }
+        let delay = result.latency.map { NumberFormatter.three(NSNumber(value: $0)) + " ms" }
+            ?? "Request failed".localized
+        return delay + " · " + result.connection.kind.title
+    }
+
+    var proxyTestTooltip: String? {
+        guard let result = currentProxyTestResult else { return nil }
+        let date = DateFormatter.localizedString(from: result.testedAt, dateStyle: .short, timeStyle: .medium)
+        let path = result.connection.source.isEmpty ? result.connection.kind.title
+            : result.connection.source + " · " + result.connection.kind.title
+        return ["Proxy HTTPS request latency".localized, ProxyProbe.target, date, path, result.failure?.title]
+            .compactMap { $0 }.joined(separator: "\n")
+    }
     
     override init() {
         uuid = UUID().uuidString
@@ -42,6 +71,7 @@ import Cocoa
             profile.serverPort = (data["ServerPort"] as! NSNumber).uint16Value
             profile.method = (data["Method"] as! String).lowercased()
             profile.password = data["Password"] as! String
+            profile.zeroTierPeerID = data["ZeroTierPeerID"] as? String ?? ""
             
             if let remark = data["Remark"] {
                 profile.remark = remark as! String
@@ -82,6 +112,7 @@ import Cocoa
         d["Method"] = method as AnyObject?
         d["Password"] = password as AnyObject?
         d["Remark"] = remark as AnyObject?
+        if !zeroTierPeerID.isEmpty { d["ZeroTierPeerID"] = zeroTierPeerID as AnyObject }
         d["ssrProtocol"] = ssrProtocol as AnyObject?
         d["ssrProtocolParam"] = ssrProtocolParam as AnyObject?
         d["ssrObfs"] = ssrObfs as AnyObject?

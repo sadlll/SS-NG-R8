@@ -1,0 +1,15 @@
+# Proxy request diagnostics
+
+Replace the two-second ICMP/TCP-only menu test with an HTTPS request through each profile's own temporary ss-local. Display request latency followed by the observed direct/relay state. Existing credentials, SSR options, active profile, launch agents and system proxy configuration must remain unchanged.
+
+The implementation uses the existing bundled/installed ss-local and system curl, rather than implementing Shadowsocks encryption again or switching the user's active proxy while testing. A TCP handshake alone cannot establish that credentials or proxy forwarding work. Each isolated probe has a private configuration, an ephemeral loopback port, bounded startup and two attempts of up to ten seconds. Only a TLS-validated HTTP 204 from https://www.gstatic.com/generate_204 is successful. The displayed milliseconds measure the complete HTTPS request, not bandwidth or ICMP RTT. Temporary helpers/configurations are removed on success and failure.
+
+Tailscale status is matched by resolved peer addresses: a current endpoint is direct; an active DERP/peer relay is relayed; idle/offline/missing evidence remains unknown. A home DERP region alone does not establish relaying. ZeroTier's route interface and neighbor MAC identify the network/peer using its documented MAC mapping; only a live direct path or a recently exercised relay is classified. Bridged/routed/ambiguous destinations and unavailable CLI access stay unknown. Ordinary successful connections outside overlay interfaces are direct. Path labels are observations at test time, with source/time/error details in tooltips.
+
+Results belong to the profile UUID and configuration snapshot, not array positions or hostnames. All model/menu updates occur on the main queue. All-failure and empty runs must finish; stale successes are cleared; edits/deletions during a run must not receive outdated results. Menu sorting/reload preserves valid transient measurements. Existing ICMP/TCP preferences no longer select the proxy health test.
+
+Validation: focused Swift tests for real probe validation, subprocess deadlines/cleanup, overlay classification, neighbor mapping and batch completion; build the full macOS app; run the production diagnostics against the configured nodes without exposing credentials or replacing the installed app.
+
+Runtime finding: macOS 27.2.1 hides ARP data from compiled apps without a profile-authorized Network Topology Observation entitlement. Add an optional per-profile ZeroTier node ID association, configured in server preferences, to query the named peer without ARP. Validate syntax, require that it is a current LEAF peer on a ZeroTier-routed destination, and reject conflicts with available neighbor evidence. Do not hardcode mappings, modify OS privacy settings, or create Apple developer resources. Show unknown when no association/evidence is available.
+
+Menu refresh restores order by UUID instead of reloading persisted profiles, preserving live editing objects. Author review replaces the unavailable independent reviewer (tool usage limit).

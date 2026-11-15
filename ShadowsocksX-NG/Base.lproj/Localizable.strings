@@ -95,3 +95,22 @@
 "Export Command Copied." = "Export Command Copied.";
 
 "Export Command Copied Failed." = "Export Command Copied Failed.";
+
+"Direct" = "Direct";
+"Relay" = "Relay";
+"Path unknown" = "Path unknown";
+"Testing proxy…" = "Testing proxy…";
+"Request failed" = "Request failed";
+"Test proxy requests" = "Test proxy requests";
+"HTTPS proxy request" = "HTTPS proxy request";
+"Proxy HTTPS request latency" = "Proxy HTTPS request latency (not bandwidth); path observed at test time";
+"Proxy test completed" = "Proxy test completed";
+"No proxy request succeeded" = "No proxy request succeeded";
+"Proxy helper unavailable" = "Proxy helper unavailable";
+"Proxy helper failed to start" = "Proxy helper failed to start";
+"Proxy HTTPS request failed" = "Proxy HTTPS request failed (TLS-validated HTTP 204 required)";
+"Proxy test cancelled" = "Proxy test cancelled";
+
+"ZeroTier peer…" = "ZeroTier peer…";
+"ZeroTier peer ID" = "ZeroTier peer ID";
+"ZeroTier peer association help" = "Optional: enter the target's 10-digit ZeroTier node ID. On macOS 27, apps may be unable to read the neighbor table automatically. The test will use this node's live direct/relay state. Leave blank for automatic detection; update this association if the server address changes. Save the profile, then run the proxy test again.";

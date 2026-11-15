@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D1A600000000000000000011 /* ProxyProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000001 /* ProxyProbe.swift */; };
+		D1A600000000000000000012 /* OverlayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000002 /* OverlayConnection.swift */; };
+		D1A600000000000000000013 /* ProxyTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000003 /* ProxyTestResult.swift */; };
 		020C66675915A5F2FE906D1D /* libPods-proxy_conf_helper.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 168D9B6E0133D852A5F3F791 /* libPods-proxy_conf_helper.a */; };
 		083BF8371D82742200831C68 /* PingClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 083BF8351D82742200831C68 /* PingClient.swift */; };
 		08635C771EF750FA00F1D25E /* SubscribeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08635C761EF750FA00F1D25E /* SubscribeManager.swift */; };
@@ -120,6 +123,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D1A600000000000000000001 /* ProxyProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProxyProbe.swift; path = ../Diagnostics/ProxyProbe.swift; sourceTree = "<group>"; };
+		D1A600000000000000000002 /* OverlayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OverlayConnection.swift; path = ../Diagnostics/OverlayConnection.swift; sourceTree = "<group>"; };
+		D1A600000000000000000003 /* ProxyTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProxyTestResult.swift; path = ../Diagnostics/ProxyTestResult.swift; sourceTree = "<group>"; };
 		083BF8351D82742200831C68 /* PingClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PingClient.swift; sourceTree = "<group>"; };
 		085641E91D7188C400116B27 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		08635C761EF750FA00F1D25E /* SubscribeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SubscribeManager.swift; sourceTree = "<group>"; };
@@ -339,6 +345,9 @@
 				9B3FFF0C1D05FEB30019A709 /* Utils.swift */,
 				9B3FFF201D08826E0019A709 /* PACUtils.swift */,
 				083BF8351D82742200831C68 /* PingClient.swift */,
+				D1A600000000000000000001 /* ProxyProbe.swift */,
+				D1A600000000000000000002 /* OverlayConnection.swift */,
+				D1A600000000000000000003 /* ProxyTestResult.swift */,
 				9B3FFF131D0705810019A709 /* NotificationName.swift */,
 				E8B569892456C900001DA9A7 /* Network.swift */,
 				BE6B3C86246AD950000286B0 /* Shortcuts.swift */,
@@ -630,6 +639,9 @@
 				BEAE65F02471614900995D48 /* SettingsWindowController.swift in Sources */,
 				BEAE65F12471614900995D49 /* UserRulesController.swift in Sources */,
 				083BF8371D82742200831C68 /* PingClient.swift in Sources */,
+				D1A600000000000000000011 /* ProxyProbe.swift in Sources */,
+				D1A600000000000000000012 /* OverlayConnection.swift in Sources */,
+				D1A600000000000000000013 /* ProxyTestResult.swift in Sources */,
 				E8B5698A2456C900001DA9A7 /* Network.swift in Sources */,
 				BE492025242F412900A6C78E /* tcping.swift in Sources */,
 				BEAA0EDD244B273A00809ADD /* MainMenuManager.swift in Sources */,
@@ -858,7 +870,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuyuzhou.ShadowsocksX-NG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -897,7 +909,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuyuzhou.ShadowsocksX-NG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

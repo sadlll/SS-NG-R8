@@ -99,6 +99,38 @@ class PreferencesWindowController: NSWindowController
             ])
         profilesTableView.reloadData()
         updateProfileBoxVisible()
+        let peerButton = NSButton(title: "ZeroTier peer…".localized, target: self, action: #selector(configureZeroTierPeer))
+        peerButton.translatesAutoresizingMaskIntoConstraints = false
+        if let content = window?.contentView {
+            content.addSubview(peerButton)
+            NSLayoutConstraint.activate([
+                peerButton.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20),
+                peerButton.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
+                peerButton.widthAnchor.constraint(lessThanOrEqualToConstant: 220)
+            ])
+        }
+    }
+
+    @objc private func configureZeroTierPeer() {
+        guard let profile = editingProfile, let window = window else { NSSound.beep(); return }
+        let alert = NSAlert()
+        alert.messageText = "ZeroTier peer ID".localized
+        alert.informativeText = "ZeroTier peer association help".localized
+        let field = NSTextField(string: profile.zeroTierPeerID)
+        field.frame = NSRect(x: 0, y: 0, width: 300, height: 24)
+        field.placeholderString = "0123456789"
+        alert.accessoryView = field
+        alert.addButton(withTitle: "OK".localized)
+        alert.addButton(withTitle: "Cancel".localized)
+        alert.beginSheetModal(for: window) { response in
+            guard response == .alertFirstButtonReturn else { return }
+            let value = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard value.isEmpty || (value.count == 10 && UInt64(value, radix: 16) != nil) else {
+                NSSound.beep()
+                return
+            }
+            profile.zeroTierPeerID = value
+        }
     }
     
     override func awakeFromNib() {

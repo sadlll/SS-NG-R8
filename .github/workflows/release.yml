@@ -27,6 +27,12 @@ jobs:
           swift --version
           uname -m
 
+      - name: Test proxy diagnostics
+        run: |
+          set -eo pipefail
+          swift test
+          ./script/test_app_model.sh
+
       - name: Build (Release, unsigned)
         run: |
           set -eo pipefail
@@ -36,6 +42,7 @@ jobs:
             -configuration Release \
             -derivedDataPath build \
             ARCHS=arm64 \
+            MACOSX_DEPLOYMENT_TARGET=14.0 \
             ONLY_ACTIVE_ARCH=NO \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGN_STYLE=Manual \
@@ -43,6 +50,14 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             DEVELOPMENT_TEAM="" \
             clean build
+
+      - name: Sign and verify app
+        run: |
+          set -eo pipefail
+          APP_PATH="build/Build/Products/Release/ShadowsocksX-NG.app"
+          codesign --force --deep --sign - "$APP_PATH"
+          codesign --verify --deep --strict "$APP_PATH"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PATH/Contents/Info.plist")" = "${GITHUB_REF_NAME#v}"
 
       - name: Package DMG
         run: |
@@ -65,12 +80,15 @@ jobs:
             -ov -format UDZO \
             "$DMG_NAME"
 
+          hdiutil verify "$DMG_NAME"
+
           echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
           shasum -a 256 "$DMG_NAME" | tee "${DMG_NAME}.sha256"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          draft: true
           files: |
             ${{ env.DMG_NAME }}
             ${{ env.DMG_NAME }}.sha256
@@ -78,6 +96,6 @@ jobs:
           body: |
             ## ShadowsocksX-NG-R8 ${{ github.ref_name }}
 
-            Apple Silicon (arm64) 构建，**未签名**。首次打开方式：
+            Apple Silicon (arm64)，需要 macOS 14 或更新版本。使用 ad-hoc 签名，未经 Apple 公证。首次打开方式：
             - 右键点击 App → 打开，或
             - 终端执行：`xattr -dr com.apple.quarantine /Applications/ShadowsocksX-NG.app`

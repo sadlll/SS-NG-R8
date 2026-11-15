@@ -119,7 +119,8 @@ class ServerProfileManager: NSObject {
                 if let p = oldProfiles.first(where: { (p) -> Bool in
                     return p.uuid == profile.uuid
                 }) {
-                    profile.latency = p.latency
+                    profile.proxyTestState = p.proxyTestState
+                    profile.latency = NSNumber(value: profile.currentProxyTestResult?.latency ?? .infinity)
                 }
             }
         }

@@ -131,3 +131,22 @@
 "Failed to Add Server Profile" = "添加服务器配置失败";
 
 "Address can not be recognized" = "未找到有效的服务器配置";
+
+"Direct" = "直连";
+"Relay" = "中继";
+"Path unknown" = "路径未知";
+"Testing proxy…" = "正在测试代理…";
+"Request failed" = "请求失败";
+"Test proxy requests" = "服务器代理请求测试";
+"HTTPS proxy request" = "HTTPS 代理请求";
+"Proxy HTTPS request latency" = "代理 HTTPS 请求耗时（非带宽）；路径为测试时的观测结果";
+"Proxy test completed" = "代理请求测试完成";
+"No proxy request succeeded" = "所有节点的代理请求均未成功";
+"Proxy helper unavailable" = "代理测试程序不可用";
+"Proxy helper failed to start" = "临时代理启动失败";
+"Proxy HTTPS request failed" = "代理 HTTPS 请求失败（需通过 TLS 验证并返回 HTTP 204）";
+"Proxy test cancelled" = "代理测试已取消";
+
+"ZeroTier peer…" = "ZeroTier 节点…";
+"ZeroTier peer ID" = "ZeroTier 节点 ID";
+"ZeroTier peer association help" = "可选：填写目标服务器的 10 位 ZeroTier 节点 ID。macOS 27 可能不允许应用自动读取邻居表，填写后会查询该节点实时的直连／中继状态。留空则自动识别；服务器地址改变时请更新关联。保存服务器设置后重新测试。";

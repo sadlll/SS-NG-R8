@@ -962,15 +962,14 @@ DQ
                                             </textFieldCell>
                                         </textField>
                                         <comboBox verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="y8o-bO-KiP">
-                                            <rect key="frame" x="316" y="293" width="79" height="25"/>
+                                            <rect key="frame" x="316" y="293" width="200" height="25"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" completes="NO" numberOfVisibleItems="5" id="TgX-b9-ytJ">
                                                 <font key="font" metaFont="system"/>
                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                 <objectValues>
-                                                    <string>ICMP</string>
-                                                    <string>TCP</string>
+                                                    <string>HTTPS proxy request</string>
                                                 </objectValues>
                                             </comboBoxCell>
                                         </comboBox>

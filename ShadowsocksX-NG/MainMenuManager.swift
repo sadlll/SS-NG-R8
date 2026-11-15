@@ -490,14 +490,8 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
                 } else {
                     serverMenuText = p.serverHost
                 }
-                if p.latency.doubleValue != Double.infinity {
-                    serverMenuText += "  - \(NumberFormatter.three(p.latency)) ms"
-                }
-                else{
-                    if !neverSpeedTestBefore {
-                        serverMenuText += "  - failed"
-                    }
-                }
+                if !p.proxyTestSummary.isEmpty { serverMenuText += "  - " + p.proxyTestSummary }
+                serversMenuItem.toolTip = p.proxyTestTooltip
             }
         }
 
@@ -581,6 +575,7 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     
     //TODO:https://git.codingcafe.org/Mirrors/shadowsocks/ShadowsocksX-NG/blob/master/ShadowsocksX-NG/AppDelegate.swift
     func updateServersMenu() {
+        connectionDelayTestMenuItem.title = (isTesting ? "Testing proxy…" : "Test proxy requests").localized
         let mgr = ServerProfileManager.instance
         serversMenuItem.submenu?.removeAllItems()
        
@@ -594,42 +589,35 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
         if !neverSpeedTestBefore {
             if UserDefaults.standard.bool(forKey: USERDEFAULTS_ASCENDING_DELAY) {
                 mgr.profiles = mgr.profiles.sorted { (p1, p2) -> Bool in
-                    return p1.latency.doubleValue <= p2.latency.doubleValue
+                    return (p1.currentProxyTestResult?.latency ?? .infinity) < (p2.currentProxyTestResult?.latency ?? .infinity)
                 }
             } else {
-                mgr.reload()
+                // Preserve live profile edits and bindings while restoring the user's configured order.
+                let saved = UserDefaults.standard.array(forKey: USERDEFAULTS_SERVER_PROFILES) as? [[String: Any]] ?? []
+                let indices = ProfileOrder.restoredIndices(currentIDs: mgr.profiles.map { $0.uuid },
+                                                          savedIDs: saved.compactMap { $0["Id"] as? String })
+                let profiles = mgr.profiles
+                mgr.profiles = indices.map { profiles[$0] }
             }
         }
         self.serverMenuItemNormal(mgr)
     }
     
     private func serverMenuItemNormal(_ mgr: ServerProfileManager) {
-        var fastTime = ""
         var i = 0
-        if let t = UserDefaults.standard.object(forKey: USERDEFAULTS_FASTEST_NODE) as? String {
-            fastTime = t
-        }
+        let fastest = mgr.profiles.filter { $0.currentProxyTestResult?.latency != nil }
+            .min { ($0.currentProxyTestResult?.latency ?? .infinity) < ($1.currentProxyTestResult?.latency ?? .infinity) }?.uuid
         for p in mgr.profiles {
             let item = NSMenuItem(title: p.title(), action: #selector(MainMenuManager.selectServer), keyEquivalent: "")
             item.tag = i //+ kProfileMenuItemIndexBase
             item.target = self
             
-            let latency = p.latency
-            let nf = NumberFormatter.three(latency)
-            if latency.doubleValue != Double.infinity {
-                item.title += "  - \(nf)ms"
-                if nf == fastTime {
-                    let dic = [NSAttributedString.Key.foregroundColor : NSColor.green]
-                    let attStr = NSAttributedString(string: item.title, attributes: dic)
-                    item.attributedTitle = attStr
-                }
-            }else{
-                if !neverSpeedTestBefore {
-                    item.title += "  - failed"
-                    let dic = [NSAttributedString.Key.foregroundColor : NSColor.red]
-                    let attStr = NSAttributedString(string: item.title, attributes: dic)
-                    item.attributedTitle = attStr
-                }
+            if !p.proxyTestSummary.isEmpty { item.title += "  - " + p.proxyTestSummary }
+            item.toolTip = p.proxyTestTooltip
+            if p.uuid == fastest {
+                item.attributedTitle = NSAttributedString(string: item.title, attributes: [.foregroundColor: NSColor.green])
+            } else if let result = p.currentProxyTestResult, result.latency == nil {
+                item.attributedTitle = NSAttributedString(string: item.title, attributes: [.foregroundColor: NSColor.red])
             }
             if mgr.getActiveProfileId() == p.uuid {
                 item.state = NSControl.StateValue(rawValue: 1)
@@ -720,7 +708,7 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
                 if (mustShowAlert || newVersion["newVersion"] as! Bool){
                     let alertResult = versionChecker.showAlertView(Title: newVersion["Title"] as! String, SubTitle: newVersion["SubTitle"] as! String, ConfirmBtn: newVersion["ConfirmBtn"] as! String, CancelBtn: newVersion["CancelBtn"] as! String)
                     if (newVersion["newVersion"] as! Bool && alertResult == 1000){
-                        NSWorkspace.shared.open(URL(string: "https://github.com/paradiseduo/ShadowsocksX-NG-R8/releases")!)
+                        NSWorkspace.shared.open(URL(string: "https://github.com/sadlll/SS-NG-R8/releases")!)
                     }
                 }
             }

@@ -26,6 +26,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    func applicationWillTerminate(_ notification: Notification) {
+        ConnectTestigManager.shared.cancel()
+    }
+
     static func stopSSR(finish: @escaping()->()) {
         StopSSLocal { (s) in
             StopPrivoxy { (ss) in
