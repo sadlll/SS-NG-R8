@@ -89,6 +89,7 @@ enum BoundedCommand {
 
 final class ProxyProbe {
     static let target = "https://www.gstatic.com/generate_204"
+    private static let requestTimeout: TimeInterval = 25
     private let helperURL: URL
     private let cancellation: ProbeCancellation
 
@@ -102,7 +103,7 @@ final class ProxyProbe {
                 "--proxy", "socks5h://127.0.0.1:\(port)",
                 // curl's connect timeout includes SOCKS negotiation and the entire TLS handshake.
                 // Relay retransmissions can exceed five seconds even when the proxy works.
-                "--connect-timeout", "15", "--max-time", "25", "--retry", "0",
+                "--connect-timeout", "15", "--max-time", String(Int(requestTimeout)), "--retry", "0",
                 "--output", "/dev/null", "--write-out", "%{http_code} %{time_total}", "--url", target]
     }
 
@@ -139,7 +140,7 @@ final class ProxyProbe {
             config.removeValue(forKey: "_diagnostic_zerotier_peer")
             config["local_address"] = "127.0.0.1"
             config["local_port"] = Int(port)
-            config["timeout"] = 10
+            config["timeout"] = Int(Self.requestTimeout) + 5
             let configURL = directory.appendingPathComponent("config.json")
             let data = try JSONSerialization.data(withJSONObject: config)
             try data.write(to: configURL, options: .atomic)
@@ -168,7 +169,7 @@ final class ProxyProbe {
             for _ in 0..<2 {
                 guard !cancellation.isCancelled else { return ProxyTestResult(latency: nil, failure: .cancelled) }
                 let response = BoundedCommand.run("/usr/bin/curl", arguments: Self.curlArguments(port: port),
-                                                  timeout: 27, cancellation: cancellation)
+                                                  timeout: Self.requestTimeout + 2, cancellation: cancellation)
                 if let latency = Self.latency(from: response) {
                     return ProxyTestResult(latency: latency, failure: nil)
                 }

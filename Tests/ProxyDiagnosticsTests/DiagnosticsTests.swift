@@ -232,6 +232,10 @@ final class DiagnosticsTests: XCTestCase {
         }
         XCTAssertEqual(received["local_address"] as? String, "127.0.0.1")
         XCTAssertNotEqual(received["local_port"] as? Int, 1086)
+        let requestArguments = ProxyProbe.curlArguments(port: 12345)
+        let requestLimit = Double(requestArguments[requestArguments.firstIndex(of: "--max-time")! + 1])!
+        XCTAssertGreaterThanOrEqual((received["timeout"] as? NSNumber)?.doubleValue ?? 0, requestLimit,
+                                    "The helper must not close a connection before the HTTPS request deadline")
         let lines = try String(contentsOf: metadata).split(separator: "\n").map(String.init)
         XCTAssertEqual(lines[0], "600")
         XCTAssertFalse(FileManager.default.fileExists(atPath: lines[1]))
