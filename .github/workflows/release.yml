@@ -51,13 +51,23 @@ jobs:
             DEVELOPMENT_TEAM="" \
             clean build
 
+      - name: Test updater integration
+        run: ./script/test_updater_model.sh
+
       - name: Sign and verify app
         run: |
           set -eo pipefail
           APP_PATH="build/Build/Products/Release/ShadowsocksX-NG.app"
-          codesign --force --deep --sign - "$APP_PATH"
-          codesign --verify --deep --strict "$APP_PATH"
+          ./script/sign_app.sh "$APP_PATH"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PATH/Contents/Info.plist")" = "${GITHUB_REF_NAME#v}"
+
+      - name: Package signed in-app update
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          set -eo pipefail
+          test -n "$SPARKLE_PRIVATE_KEY" || { echo "Missing update signing key" >&2; exit 1; }
+          ./script/package_update.sh build/Build/Products/Release/ShadowsocksX-NG.app release-updates "$GITHUB_REF_NAME"
 
       - name: Package DMG
         run: |
@@ -92,6 +102,9 @@ jobs:
           files: |
             ${{ env.DMG_NAME }}
             ${{ env.DMG_NAME }}.sha256
+            release-updates/*.zip
+            release-updates/*.zip.sha256
+            release-updates/appcast.xml
           generate_release_notes: true
           body: |
             ## ShadowsocksX-NG-R8 ${{ github.ref_name }}

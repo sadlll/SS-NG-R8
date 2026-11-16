@@ -152,3 +152,5 @@
 "ZeroTier peer association help" = "可选：填写目标服务器的 10 位 ZeroTier 节点 ID。macOS 27 可能不允许应用自动读取邻居表，填写后会查询该节点实时的直连／中继状态。留空则自动识别；服务器地址改变时请更新关联。保存服务器设置后重新测试。";
 
 "LAN direct" = "局域网直连";
+
+"Check and Install Updates…" = "检查并安装更新…";

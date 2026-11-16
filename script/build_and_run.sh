@@ -17,7 +17,7 @@ xcodebuild -workspace ShadowsocksX-NG.xcworkspace -scheme ShadowsocksX-NG \
   MACOSX_DEPLOYMENT_TARGET=14.0 CODE_SIGNING_ALLOWED=NO build
 if [ "$MODE" = "--build-only" ]; then exit 0; fi
 # Local ad-hoc signing allows launching the development bundle on Apple Silicon.
-/usr/bin/codesign --force --deep --sign - "$APP_BUNDLE"
+"$ROOT_DIR/script/sign_app.sh" "$APP_BUNDLE"
 if [ "$MODE" = "--debug" ]; then
   exec /usr/bin/lldb -- "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 fi

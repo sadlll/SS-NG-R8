@@ -32,9 +32,11 @@ rm -rf ~/Library/Caches/com.qiuyuzhou.ShadowsocksX-NG
 
 # ShadowsocksX-NG-R
 
-Current version is [2.0.4](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.0.4)
+Current version is [2.1.0](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.1.0)
 
 当前发行包适用于 Apple Silicon、macOS 14 或更新版本。服务器测试已改为真实 HTTPS 代理请求，并显示直连/中继状态。详见[代理测试说明](docs/proxy-diagnostics.md)。
+
+从 2.1.0 起，点击“帮助 → 检查并安装更新…”即可在应用内下载、校验、安装新版并重新启动，保留服务器和代理设置。旧版首次升级仍需下载安装。更新包与更新列表使用 Ed25519 签名校验，详见[应用内更新说明](docs/automatic-updates.md)。
 
 [![Build Status](https://travis-ci.org/shadowsocksr/ShadowsocksX-NG.svg?branches=develop)](https://travis-ci.org/shadowsocksr/ShadowsocksX-NG)
 [![Swift](https://img.shields.io/badge/swift-5.2-orange.svg)](https://www.python.org/downloads/)
@@ -43,17 +45,7 @@ Current version is [2.0.4](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.0.
 
 Next Generation of [ShadowsocksX](https://github.com/shadowsocks/shadowsocks-iOS) with SSR support.
 
-**After Download Please check the GPG signature!**
-
-First get [My pub key](https://github.com/qinyuhang/Pubkey) and [import the Pub key]()
-
-`gpg --import pubkeys.txt`
-
-Then [verify the signature](http://stackoverflow.com/questions/19011093/how-do-i-verify-a-gpg-signature-matches-a-public-key-file)
-
-Place the `.dmg` and `.dmg.sig` file together in a directory
-
-`gpg --verify {drag the ShadowsocksX-NG-R8.dmg.sig into your terminal}`
+手动下载安装时，可使用同一 Release 提供的 `.sha256` 文件检查下载是否完整：`shasum -a 256 -c ShadowsocksX-NG-R8-v2.1.0-arm64.dmg.sha256`。应用内更新会额外验证内置公钥对应的签名。发行包使用 ad-hoc 签名，尚未经 Apple 公证。
 
 ## Why?
 

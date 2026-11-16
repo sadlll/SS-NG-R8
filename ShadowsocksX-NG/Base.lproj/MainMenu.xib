@@ -28,6 +28,7 @@
                 <outlet property="serversMenuItem" destination="u5M-hQ-VSc" id="8gp-SY-Y4U"/>
                 <outlet property="serversPreferencesMenuItem" destination="M5r-E7-44f" id="voe-SX-k6a"/>
                 <outlet property="speedMenu" destination="yeJ-HT-sBl" id="fYv-Vc-e6P"/>
+                <outlet property="checkUpdatesMenuItem" destination="v33-t5-s50" id="upd-menu-001"/>
                 <outlet property="statusMenu" destination="Hob-KD-bx9" id="Z0D-Ny-SwF"/>
                 <outlet property="toggleRunningMenuItem" destination="GSu-Tf-StS" id="XHw-pU-nCa"/>
                 <outlet property="whiteListModeMenuItem" destination="RvZ-Zn-29U" id="2v5-Bd-EDj"/>
@@ -239,7 +240,7 @@
                                     <action selector="feedback:" target="Voe-Tx-rLC" id="XYP-0i-SiI"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Check Updates" id="v33-t5-s50">
+                            <menuItem title="Check and Install Updates…" id="v33-t5-s50">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="checkForUpdate:" target="Voe-Tx-rLC" id="Vcn-Hr-FM1"/>

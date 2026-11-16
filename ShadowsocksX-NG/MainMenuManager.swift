@@ -20,6 +20,7 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     
     // MARK: Outlets
     @IBOutlet weak var statusMenu: NSMenu!
+    @IBOutlet weak var checkUpdatesMenuItem: NSMenuItem!
     @IBOutlet weak var speedMenu: NSMenu!
     
     @IBOutlet weak var runningStatusMenuItem: NSMenuItem!
@@ -49,6 +50,7 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     let repeatTimeinterval: TimeInterval = 2.0
     
     override func awakeFromNib() {
+        VersionChecker.shared.configure(menuItem: checkUpdatesMenuItem)
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(self.handleURLEvent), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
         
         UNUserNotificationCenter.current().delegate = self
@@ -701,20 +703,11 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     }
     
     func checkForUpdate(mustShowAlert: Bool) -> Void {
-        let versionChecker = VersionChecker()
-        DispatchQueue.global().async {
-            let newVersion = versionChecker.checkNewVersion()
-            DispatchQueue.main.async {
-                if (mustShowAlert || newVersion["newVersion"] as! Bool){
-                    let alertResult = versionChecker.showAlertView(Title: newVersion["Title"] as! String, SubTitle: newVersion["SubTitle"] as! String, ConfirmBtn: newVersion["ConfirmBtn"] as! String, CancelBtn: newVersion["CancelBtn"] as! String)
-                    if (newVersion["newVersion"] as! Bool && alertResult == 1000){
-                        NSWorkspace.shared.open(URL(string: "https://github.com/sadlll/SS-NG-R8/releases")!)
-                    }
-                }
-            }
+        DispatchQueue.main.async {
+            VersionChecker.shared.checkForUpdates(userInitiated: mustShowAlert)
         }
     }
-    
+
     private func foundSSRURL(_ note: Notification) {
         func failedNotification() {
             postUserNotification(

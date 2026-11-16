@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
+        D1A700000000000000000001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = D1A700000000000000000010 /* Sparkle */; };
 		D1A600000000000000000011 /* ProxyProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000001 /* ProxyProbe.swift */; };
 		D1A600000000000000000012 /* OverlayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000002 /* OverlayConnection.swift */; };
 		D1A600000000000000000013 /* ProxyTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000003 /* ProxyTestResult.swift */; };
@@ -229,6 +230,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1A700000000000000000001 /* Sparkle in Frameworks */,
 				9B3FFF3E1D08D9910019A709 /* SystemConfiguration.framework in Frameworks */,
 				A40EFDAD315FA9A6DEAFB357 /* Pods_ShadowsocksX_NG.framework in Frameworks */,
 			);
@@ -437,6 +439,7 @@
 				9B3FFF531D09E2B30019A709 /* PBXTargetDependency */,
 			);
 			name = "ShadowsocksX-NG";
+            packageProductDependencies = (D1A700000000000000000010 /* Sparkle */, );
 			productName = "ShadowsocksX-NG";
 			productReference = 9B0BFFE51D0460A70040E62B /* ShadowsocksX-NG.app */;
 			productType = "com.apple.product-type.application";
@@ -497,6 +500,7 @@
 					ProjectRef = 9833501C242C4E2600F947A4 /* LaunchAtLoginHelper.xcodeproj */;
 				},
 			);
+			packageReferences = (D1A700000000000000000011 /* XCRemoteSwiftPackageReference "Sparkle" */, );
 			projectRoot = "";
 			targets = (
 				9B0BFFE41D0460A70040E62B /* ShadowsocksX-NG */,
@@ -731,6 +735,21 @@
 		};
 /* End PBXVariantGroup section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+        D1A700000000000000000011 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+            isa = XCRemoteSwiftPackageReference;
+            repositoryURL = "https://github.com/sparkle-project/Sparkle";
+            requirement = {kind = exactVersion; version = 2.10.1; };
+        };
+/* End XCRemoteSwiftPackageReference section */
+/* Begin XCSwiftPackageProductDependency section */
+        D1A700000000000000000010 /* Sparkle */ = {
+            isa = XCSwiftPackageProductDependency;
+            package = D1A700000000000000000011 /* XCRemoteSwiftPackageReference "Sparkle" */;
+            productName = Sparkle;
+        };
+/* End XCSwiftPackageProductDependency section */
+
 /* Begin XCBuildConfiguration section */
 		9B0B00061D0460A70040E62B /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -870,7 +889,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.4;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuyuzhou.ShadowsocksX-NG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -909,7 +928,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.0.4;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuyuzhou.ShadowsocksX-NG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
