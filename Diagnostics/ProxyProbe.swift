@@ -107,7 +107,7 @@ final class ProxyProbe {
                 "--output", "/dev/null", "--write-out", "%{http_code} %{time_total}", "--url", target]
     }
 
-    static func latency(from result: CommandResult) -> Double? {
+    static func requestDuration(from result: CommandResult) -> Double? {
         let fields = result.output.split(whereSeparator: { $0.isWhitespace })
         guard result.status == 0, !result.timedOut, fields.count == 2, fields[0] == "204",
               let seconds = Double(fields[1]), seconds.isFinite, seconds > 0 else { return nil }
@@ -115,9 +115,9 @@ final class ProxyProbe {
     }
 
     func test(configuration: [String: Any]) -> ProxyTestResult {
-        guard !cancellation.isCancelled else { return ProxyTestResult(latency: nil, failure: .cancelled) }
+        guard !cancellation.isCancelled else { return ProxyTestResult(requestDuration: nil, failure: .cancelled) }
         guard FileManager.default.isExecutableFile(atPath: helperURL.path) else {
-            return ProxyTestResult(latency: nil, failure: .helperUnavailable)
+            return ProxyTestResult(requestDuration: nil, failure: .helperUnavailable)
         }
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("ss-proxy-test-" + UUID().uuidString)
         let helper = Process()
@@ -163,26 +163,26 @@ final class ProxyProbe {
                 Thread.sleep(forTimeInterval: 0.025)
             }
             guard ready else {
-                return ProxyTestResult(latency: nil, failure: cancellation.isCancelled ? .cancelled : .startup)
+                return ProxyTestResult(requestDuration: nil, failure: cancellation.isCancelled ? .cancelled : .startup)
             }
-            var failure = ProxyTestResult(latency: nil, failure: .request)
+            var failure = ProxyTestResult(requestDuration: nil, failure: .request)
             for _ in 0..<2 {
-                guard !cancellation.isCancelled else { return ProxyTestResult(latency: nil, failure: .cancelled) }
+                guard !cancellation.isCancelled else { return ProxyTestResult(requestDuration: nil, failure: .cancelled) }
                 let response = BoundedCommand.run("/usr/bin/curl", arguments: Self.curlArguments(port: port),
                                                   timeout: Self.requestTimeout + 2, cancellation: cancellation)
-                if let latency = Self.latency(from: response) {
-                    return ProxyTestResult(latency: latency, failure: nil)
+                if let latency = Self.requestDuration(from: response) {
+                    return ProxyTestResult(requestDuration: latency, failure: nil)
                 }
                 failure = Self.failedRequest(response)
             }
-            return cancellation.isCancelled ? ProxyTestResult(latency: nil, failure: .cancelled) : failure
+            return cancellation.isCancelled ? ProxyTestResult(requestDuration: nil, failure: .cancelled) : failure
         } catch {
-            return ProxyTestResult(latency: nil, failure: cancellation.isCancelled ? .cancelled : .startup)
+            return ProxyTestResult(requestDuration: nil, failure: cancellation.isCancelled ? .cancelled : .startup)
         }
     }
 
     static func failedRequest(_ response: CommandResult) -> ProxyTestResult {
-        var result = ProxyTestResult(latency: nil, failure: response.timedOut || response.status == 28 ? .timeout : .request)
+        var result = ProxyTestResult(requestDuration: nil, failure: response.timedOut || response.status == 28 ? .timeout : .request)
         // Only curl's controlled HTTPS probe reaches this formatter. Never include helper
         // logs or its configuration, which may contain protocol credentials.
         let error = response.errorOutput.components(separatedBy: .newlines).joined(separator: " ")

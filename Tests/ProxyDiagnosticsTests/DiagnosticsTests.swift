@@ -94,29 +94,29 @@ final class DiagnosticsTests: XCTestCase {
         let original: [String: Any] = ["server": "example.com", "password": "first"]
         let edited: [String: Any] = ["server": "example.com", "password": "second"]
         state.begin(configuration: original)
-        state.complete(result: ProxyTestResult(latency: 100, failure: nil), configuration: original, current: original)
-        XCTAssertEqual(state.currentResult(configuration: original)?.latency, 100)
+        state.complete(result: ProxyTestResult(requestDuration: 100, failure: nil), configuration: original, current: original)
+        XCTAssertEqual(state.currentResult(configuration: original)?.requestDuration, 100)
         XCTAssertNil(state.currentResult(configuration: edited))
         state.begin(configuration: original)
         XCTAssertNil(state.currentResult(configuration: original))
-        state.complete(result: ProxyTestResult(latency: nil, failure: .request), configuration: original, current: original)
-        XCTAssertNil(state.currentResult(configuration: original)?.latency)
+        state.complete(result: ProxyTestResult(requestDuration: nil, failure: .request), configuration: original, current: original)
+        XCTAssertNil(state.currentResult(configuration: original)?.requestDuration)
         XCTAssertEqual(state.currentResult(configuration: original)?.failure, .request)
         state.begin(configuration: original)
-        state.complete(result: ProxyTestResult(latency: 100, failure: nil), configuration: original, current: edited)
+        state.complete(result: ProxyTestResult(requestDuration: 100, failure: nil), configuration: original, current: edited)
         XCTAssertFalse(state.isTesting)
         XCTAssertNil(state.currentResult(configuration: edited))
     }
 
     func testProxyResponseRequiresSuccessfulCurlAndExact204() {
-        XCTAssertEqual(ProxyProbe.latency(from: CommandResult(status: 0, output: "204 0.125", timedOut: false)), 125)
+        XCTAssertEqual(ProxyProbe.requestDuration(from: CommandResult(status: 0, output: "204 0.125", timedOut: false)), 125)
         for result in [CommandResult(status: 0, output: "200 0.1", timedOut: false),
                        CommandResult(status: 0, output: "302 0.1", timedOut: false),
                        CommandResult(status: 28, output: "204 0.1", timedOut: false),
                        CommandResult(status: 0, output: "204 NaN", timedOut: false),
                        CommandResult(status: 0, output: "204 -1", timedOut: false),
                        CommandResult(status: 0, output: "204 0.1", timedOut: true)] {
-            XCTAssertNil(ProxyProbe.latency(from: result))
+            XCTAssertNil(ProxyProbe.requestDuration(from: result))
         }
     }
 
@@ -202,7 +202,7 @@ final class DiagnosticsTests: XCTestCase {
 
     func testMissingHelperFailsWithoutCreatingConfigOrCrashing() {
         let result = ProxyProbe(helperURL: URL(fileURLWithPath: "/missing/ss-local")).test(configuration: ["server": "127.0.0.1"])
-        XCTAssertNil(result.latency)
+        XCTAssertNil(result.requestDuration)
         XCTAssertEqual(result.failure, .helperUnavailable)
     }
 
@@ -258,7 +258,7 @@ final class DiagnosticsTests: XCTestCase {
         let result = ProxyProbe(helperURL: helper).test(configuration: ["server": "127.0.0.1", "server_port": 1,
                                                                        "method": "aes-256-cfb", "password": "test-only",
                                                                        "protocol": "origin", "obfs": "plain"])
-        XCTAssertNil(result.latency)
+        XCTAssertNil(result.requestDuration)
         XCTAssertEqual(result.failure, .request)
     }
 
@@ -268,7 +268,7 @@ final class DiagnosticsTests: XCTestCase {
             let batch = ProxyTestBatch()
             batch.start(configurations: Array(repeating: ["server": "127.0.0.1"], count: count),
                         helperURL: URL(fileURLWithPath: "/missing/ss-local"),
-                        inspectPaths: false, update: { _, result in XCTAssertNil(result.latency) },
+                        inspectPaths: false, update: { _, result in XCTAssertNil(result.requestDuration) },
                         completion: {
                             XCTAssertTrue(Thread.isMainThread)
                             done.fulfill()

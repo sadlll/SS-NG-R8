@@ -37,25 +37,28 @@ final class ConnectTestigManager {
             let host = configurations[index]["server"] as? String ?? ""
             let status = result.failure?.rawValue ?? "success"
             let detail = result.failureDetail ?? ""
-            let latency = result.latency ?? -1
-            self.logger.notice("Proxy test host=\(host, privacy: .public) latency_ms=\(latency) status=\(status, privacy: .public) detail=\(detail, privacy: .public)")
+            let ping = result.networkLatency ?? -1
+            let duration = result.requestDuration ?? -1
+            let badge = result.connection.badge
+            self.logger.notice("Node test host=\(host, privacy: .public) ping_ms=\(ping) request_ms=\(duration) path=\(badge, privacy: .public) status=\(status, privacy: .public) detail=\(detail, privacy: .public)")
             // Sorting/subscriptions may replace the original profile objects or their array positions.
             if let profile = ServerProfileManager.instance.profiles.first(where: { $0.uuid == ids[index] }) {
                 profile.proxyTestState.complete(result: result, configuration: configurations[index], current: profile.proxyTestConfiguration())
-                profile.latency = NSNumber(value: profile.currentProxyTestResult?.latency ?? .infinity)
+                profile.latency = NSNumber(value: profile.currentProxyTestResult?.networkLatency ?? .infinity)
             }
             NotificationCenter.default.post(name: NOTIFY_UPDATE_MAINMENU, object: nil)
         }, completion: {
             isTesting = false
             self.batch = nil
-            let valid = ServerProfileManager.instance.profiles.filter { $0.currentProxyTestResult?.latency != nil }
-            if let fastest = valid.min(by: { $0.latency.doubleValue < $1.latency.doubleValue }) {
+            let valid = ServerProfileManager.instance.profiles.filter { $0.currentProxyTestResult?.isProxyAvailable == true }
+            let candidates = valid.filter { $0.currentProxyTestResult?.usableLatency != nil }
+            if let fastest = candidates.min(by: { $0.latency.doubleValue < $1.latency.doubleValue }) {
                 let time = NumberFormatter.three(fastest.latency)
                 UserDefaults.standard.set(time, forKey: USERDEFAULTS_FASTEST_NODE)
-                postUserNotification(title: "Proxy test completed".localized + " · \(time) ms", subtitle: fastest.title())
+                postUserNotification(title: "Node test completed".localized + " · \(time) ms", subtitle: fastest.title())
             } else {
                 UserDefaults.standard.removeObject(forKey: USERDEFAULTS_FASTEST_NODE)
-                postUserNotification(title: "Proxy test completed".localized, subtitle: "No proxy request succeeded".localized)
+                postUserNotification(title: "Node test completed".localized, subtitle: (valid.isEmpty ? "No proxy request succeeded" : "Proxy available; ping unavailable").localized)
             }
             NotificationCenter.default.post(name: NOTIFY_UPDATE_MAINMENU, object: nil)
         })

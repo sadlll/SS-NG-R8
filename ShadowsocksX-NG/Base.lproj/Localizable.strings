@@ -119,3 +119,14 @@
 
 "Check and Install Updates…" = "Check and Install Updates…";
 "Proxy request timed out" = "Request timed out";
+
+/* Node RTT and independent proxy availability */
+"Testing node…" = "Testing…";
+"PING unavailable" = "PING unavailable";
+"Available" = "Available";
+"Node ping RTT" = "Node ping RTT (ICMP, average of up to 3 replies)";
+"Ping target" = "Ping target";
+"HTTPS request duration" = "HTTPS request duration";
+"Test latency and proxy" = "Test latency and proxy";
+"Node test completed" = "Node test completed";
+"Proxy available; ping unavailable" = "Proxy available; no ping replies";

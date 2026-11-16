@@ -23,11 +23,16 @@ enum ProxyTestFailure: String, Error {
 }
 
 struct ProxyTestResult {
-    let latency: Double?
+    let requestDuration: Double?
     let failure: ProxyTestFailure?
     var connection = OverlayConnection(kind: .unknown, source: "")
     var failureDetail: String?
+    var ping = PingMeasurement(roundTripTime: nil, address: nil)
     let testedAt = Date()
+
+    var networkLatency: Double? { ping.roundTripTime }
+    var isProxyAvailable: Bool { requestDuration != nil && failure == nil }
+    var usableLatency: Double? { isProxyAvailable ? networkLatency : nil }
 }
 
 struct ProfileProxyTestState {
@@ -87,11 +92,14 @@ final class ProxyTestBatch {
         for (index, configuration) in configurations.enumerated() {
             group.enter()
             queue.addOperation {
+                let host = configuration["server"] as? String ?? ""
+                let ping = PingProbe(cancellation: self.cancellation).measure(host: host)
                 let probe = ProxyProbe(helperURL: helperURL, cancellation: self.cancellation)
                 var result = probe.test(configuration: configuration)
+                result.ping = ping
                 if inspectPaths && !self.cancellation.isCancelled {
                     result.connection = OverlayInspector(cancellation: self.cancellation).inspect(
-                        host: configuration["server"] as? String ?? "", reachable: result.latency != nil,
+                        host: host, reachable: result.isProxyAvailable,
                         zeroTierPeerID: configuration["_diagnostic_zerotier_peer"] as? String ?? "")
                 }
                 let completedResult = result

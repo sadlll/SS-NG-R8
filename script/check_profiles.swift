@@ -33,9 +33,12 @@ enum CheckProfiles {
         var rows: [[String: Any]] = []
         batch.start(configurations: configurations, helperURL: helper, update: { index, result in
             let host = profiles[index]["ServerHost"] as? String ?? ""
-            let delay = result.latency.map { String(format: "%.3f ms", $0) } ?? "failed"
-            print("\(host): \(delay) · \(result.connection.badge) (\(result.connection.source))")
-            rows.append(["host": host, "latency_ms": result.latency as Any? ?? NSNull(),
+            let delay = result.networkLatency.map { String(format: "%.3f ms", $0) } ?? "unavailable"
+            let request = result.requestDuration.map { String(format: "%.3f ms", $0) } ?? "failed"
+            print("\(host): ping \(delay) · \(result.connection.badge) · proxy \(result.isProxyAvailable ? "available" : "failed"); HTTPS \(request)")
+            rows.append(["host": host, "latency_ms": result.networkLatency as Any? ?? NSNull(),
+                         "request_duration_ms": result.requestDuration as Any? ?? NSNull(), "proxy_available": result.isProxyAvailable,
+                         "ping_target": result.ping.address as Any? ?? NSNull(),
                          "path": result.connection.kind.rawValue, "badge": result.connection.badge, "source": result.connection.source,
                          "failure": result.failure?.rawValue as Any? ?? NSNull()])
         }, completion: { completed = true })

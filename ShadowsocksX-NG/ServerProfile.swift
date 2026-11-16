@@ -40,11 +40,13 @@ import Cocoa
     }
 
     var proxyTestSummary: String {
-        if proxyTestState.isTesting { return "Testing proxy…".localized }
+        if proxyTestState.isTesting { return "Testing node…".localized }
         guard let result = currentProxyTestResult else { return "" }
-        let delay = result.latency.map { NumberFormatter.three(NSNumber(value: $0)) + " ms" }
-            ?? (result.failure == .request ? "Request failed".localized : result.failure?.title ?? "Request failed".localized)
-        return delay + " · " + result.connection.badge
+        let delay = result.networkLatency.map { NumberFormatter.three(NSNumber(value: $0)) + " ms" }
+            ?? "PING unavailable".localized
+        let status = result.isProxyAvailable ? "Available".localized
+            : (result.failure == .request ? "Request failed".localized : result.failure?.title ?? "Request failed".localized)
+        return delay + " · " + result.connection.badge + " · " + status
     }
 
     var proxyTestTooltip: String? {
@@ -52,7 +54,10 @@ import Cocoa
         let date = DateFormatter.localizedString(from: result.testedAt, dateStyle: .short, timeStyle: .medium)
         let description = result.connection.badge + " · " + result.connection.localizedDescription
         let path = result.connection.source.isEmpty ? description : result.connection.source + " · " + description
-        return ["Proxy HTTPS request latency".localized, ProxyProbe.target, date, path, result.failure?.title, result.failureDetail]
+        let ping = result.networkLatency.map { NumberFormatter.three(NSNumber(value: $0)) + " ms" } ?? "PING unavailable".localized
+        let target = result.ping.address.map { "Ping target".localized + ": " + $0 }
+        let duration = result.requestDuration.map { "HTTPS request duration".localized + ": " + NumberFormatter.three(NSNumber(value: $0)) + " ms" }
+        return ["Node ping RTT".localized + ": " + ping, target, duration, ProxyProbe.target, date, path, result.failure?.title, result.failureDetail]
             .compactMap { $0 }.joined(separator: "\n")
     }
     

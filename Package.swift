@@ -7,7 +7,7 @@ let package = Package(
     products: [.library(name: "ProxyDiagnostics", targets: ["ProxyDiagnostics"])],
     targets: [
         .target(name: "ProxyDiagnostics", path: "Diagnostics",
-                sources: ["ProxyProbe.swift", "OverlayConnection.swift", "ProxyTestResult.swift"]),
+                sources: ["ProxyProbe.swift", "OverlayConnection.swift", "ProxyTestResult.swift", "PingProbe.swift"]),
         .testTarget(name: "ProxyDiagnosticsTests", dependencies: ["ProxyDiagnostics"],
                     path: "Tests/ProxyDiagnosticsTests")
     ],

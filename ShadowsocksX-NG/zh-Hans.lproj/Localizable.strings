@@ -155,3 +155,14 @@
 
 "Check and Install Updates…" = "检查并安装更新…";
 "Proxy request timed out" = "请求超时";
+
+/* Node RTT and independent proxy availability */
+"Testing node…" = "正在测试…";
+"PING unavailable" = "PING 不可用";
+"Available" = "可用";
+"Node ping RTT" = "节点 Ping 往返延迟（ICMP，最多 3 次有效回复的平均值）";
+"Ping target" = "Ping 目标";
+"HTTPS request duration" = "HTTPS 请求总耗时";
+"Test latency and proxy" = "服务器延迟与代理测试";
+"Node test completed" = "节点测试完成";
+"Proxy available; ping unavailable" = "代理可用，未获得 Ping 回复";

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D1A600000000000000000014 /* PingProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000004 /* PingProbe.swift */; };
         D1A700000000000000000001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = D1A700000000000000000010 /* Sparkle */; };
 		D1A600000000000000000011 /* ProxyProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000001 /* ProxyProbe.swift */; };
 		D1A600000000000000000012 /* OverlayConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A600000000000000000002 /* OverlayConnection.swift */; };
@@ -124,6 +125,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D1A600000000000000000004 /* PingProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PingProbe.swift; path = ../Diagnostics/PingProbe.swift; sourceTree = "<group>"; };
 		D1A600000000000000000001 /* ProxyProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProxyProbe.swift; path = ../Diagnostics/ProxyProbe.swift; sourceTree = "<group>"; };
 		D1A600000000000000000002 /* OverlayConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OverlayConnection.swift; path = ../Diagnostics/OverlayConnection.swift; sourceTree = "<group>"; };
 		D1A600000000000000000003 /* ProxyTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProxyTestResult.swift; path = ../Diagnostics/ProxyTestResult.swift; sourceTree = "<group>"; };
@@ -350,6 +352,7 @@
 				D1A600000000000000000001 /* ProxyProbe.swift */,
 				D1A600000000000000000002 /* OverlayConnection.swift */,
 				D1A600000000000000000003 /* ProxyTestResult.swift */,
+				D1A600000000000000000004 /* PingProbe.swift */,
 				9B3FFF131D0705810019A709 /* NotificationName.swift */,
 				E8B569892456C900001DA9A7 /* Network.swift */,
 				BE6B3C86246AD950000286B0 /* Shortcuts.swift */,
@@ -646,6 +649,7 @@
 				D1A600000000000000000011 /* ProxyProbe.swift in Sources */,
 				D1A600000000000000000012 /* OverlayConnection.swift in Sources */,
 				D1A600000000000000000013 /* ProxyTestResult.swift in Sources */,
+				D1A600000000000000000014 /* PingProbe.swift in Sources */,
 				E8B5698A2456C900001DA9A7 /* Network.swift in Sources */,
 				BE492025242F412900A6C78E /* tcping.swift in Sources */,
 				BEAA0EDD244B273A00809ADD /* MainMenuManager.swift in Sources */,
@@ -889,7 +893,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.1.2;
+				MARKETING_VERSION = 2.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuyuzhou.ShadowsocksX-NG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -928,7 +932,7 @@
 					"$(PROJECT_DIR)",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 2.1.2;
+				MARKETING_VERSION = 2.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.qiuyuzhou.ShadowsocksX-NG";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

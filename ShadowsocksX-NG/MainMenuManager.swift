@@ -577,7 +577,7 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     
     //TODO:https://git.codingcafe.org/Mirrors/shadowsocks/ShadowsocksX-NG/blob/master/ShadowsocksX-NG/AppDelegate.swift
     func updateServersMenu() {
-        connectionDelayTestMenuItem.title = (isTesting ? "Testing proxy…" : "Test proxy requests").localized
+        connectionDelayTestMenuItem.title = (isTesting ? "Testing node…" : "Test latency and proxy").localized
         let mgr = ServerProfileManager.instance
         serversMenuItem.submenu?.removeAllItems()
        
@@ -591,7 +591,7 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
         if !neverSpeedTestBefore {
             if UserDefaults.standard.bool(forKey: USERDEFAULTS_ASCENDING_DELAY) {
                 mgr.profiles = mgr.profiles.sorted { (p1, p2) -> Bool in
-                    return (p1.currentProxyTestResult?.latency ?? .infinity) < (p2.currentProxyTestResult?.latency ?? .infinity)
+                    return (p1.currentProxyTestResult?.networkLatency ?? .infinity) < (p2.currentProxyTestResult?.networkLatency ?? .infinity)
                 }
             } else {
                 // Preserve live profile edits and bindings while restoring the user's configured order.
@@ -607,8 +607,8 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
     
     private func serverMenuItemNormal(_ mgr: ServerProfileManager) {
         var i = 0
-        let fastest = mgr.profiles.filter { $0.currentProxyTestResult?.latency != nil }
-            .min { ($0.currentProxyTestResult?.latency ?? .infinity) < ($1.currentProxyTestResult?.latency ?? .infinity) }?.uuid
+        let fastest = mgr.profiles.filter { $0.currentProxyTestResult?.usableLatency != nil }
+            .min { ($0.currentProxyTestResult?.usableLatency ?? .infinity) < ($1.currentProxyTestResult?.usableLatency ?? .infinity) }?.uuid
         for p in mgr.profiles {
             let item = NSMenuItem(title: p.title(), action: #selector(MainMenuManager.selectServer), keyEquivalent: "")
             item.tag = i //+ kProfileMenuItemIndexBase
@@ -618,7 +618,7 @@ class MainMenuManager: NSObject, UNUserNotificationCenterDelegate {
             item.toolTip = p.proxyTestTooltip
             if p.uuid == fastest {
                 item.attributedTitle = NSAttributedString(string: item.title, attributes: [.foregroundColor: NSColor.green])
-            } else if let result = p.currentProxyTestResult, result.latency == nil {
+            } else if let result = p.currentProxyTestResult, !result.isProxyAvailable {
                 item.attributedTitle = NSAttributedString(string: item.title, attributes: [.foregroundColor: NSColor.red])
             }
             if mgr.getActiveProfileId() == p.uuid {

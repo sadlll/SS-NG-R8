@@ -77,7 +77,7 @@ final class SlowTLSProbeTests: XCTestCase {
         let port = try XCTUnwrap(UInt16(String(contentsOf: portFile)))
         let response = BoundedCommand.run("/usr/bin/curl", arguments: ProxyProbe.curlArguments(port: port) +
             ["--cacert", certificate.path], timeout: 27)
-        let latency = ProxyProbe.latency(from: response)
+        let latency = ProxyProbe.requestDuration(from: response)
         XCTAssertNotNil(latency, "A working proxy with a 6-second TLS handshake must succeed; curl exit \(response.status), \(response.output)")
         if let latency = latency { XCTAssertGreaterThanOrEqual(latency, 6000) }
     }
