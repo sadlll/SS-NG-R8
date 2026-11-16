@@ -43,7 +43,7 @@ import Cocoa
         if proxyTestState.isTesting { return "Testing proxy…".localized }
         guard let result = currentProxyTestResult else { return "" }
         let delay = result.latency.map { NumberFormatter.three(NSNumber(value: $0)) + " ms" }
-            ?? "Request failed".localized
+            ?? (result.failure == .request ? "Request failed".localized : result.failure?.title ?? "Request failed".localized)
         return delay + " · " + result.connection.badge
     }
 
@@ -52,7 +52,7 @@ import Cocoa
         let date = DateFormatter.localizedString(from: result.testedAt, dateStyle: .short, timeStyle: .medium)
         let description = result.connection.badge + " · " + result.connection.localizedDescription
         let path = result.connection.source.isEmpty ? description : result.connection.source + " · " + description
-        return ["Proxy HTTPS request latency".localized, ProxyProbe.target, date, path, result.failure?.title]
+        return ["Proxy HTTPS request latency".localized, ProxyProbe.target, date, path, result.failure?.title, result.failureDetail]
             .compactMap { $0 }.joined(separator: "\n")
     }
     

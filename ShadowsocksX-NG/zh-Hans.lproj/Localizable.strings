@@ -154,3 +154,4 @@
 "LAN direct" = "局域网直连";
 
 "Check and Install Updates…" = "检查并安装更新…";
+"Proxy request timed out" = "请求超时";

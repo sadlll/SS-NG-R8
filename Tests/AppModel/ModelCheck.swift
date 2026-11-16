@@ -41,6 +41,13 @@ enum ModelCheck {
         profile.proxyTestState.begin(configuration: config)
         profile.proxyTestState.complete(result: ProxyTestResult(latency: nil, failure: .request), configuration: config, current: config)
         precondition(profile.proxyTestSummary.hasPrefix("请求失败"))
+        profile.proxyTestState.complete(result: ProxyTestResult(latency: nil, failure: .startup), configuration: config, current: config)
+        precondition(profile.proxyTestSummary.contains(ProxyTestFailure.startup.title), "Helper startup failures must retain their cause in the menu")
+        var timeout = ProxyTestResult(latency: nil, failure: .timeout)
+        timeout.failureDetail = "curl exit 28: SSL connection timeout"
+        profile.proxyTestState.complete(result: timeout, configuration: config, current: config)
+        precondition(profile.proxyTestSummary.hasPrefix("请求超时"))
+        precondition(profile.proxyTestTooltip?.contains("SSL connection timeout") == true)
         profile.password = "edited-test-only"
         precondition(profile.currentProxyTestResult == nil)
         precondition(profile.proxyTestSummary.isEmpty)

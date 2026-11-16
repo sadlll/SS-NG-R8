@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 var isTesting = false
 var neverSpeedTestBefore = true
@@ -6,6 +7,7 @@ var neverSpeedTestBefore = true
 final class ConnectTestigManager {
     static let shared = ConnectTestigManager()
     private var batch: ProxyTestBatch?
+    private let logger = Logger(subsystem: "com.qiuyuzhou.ShadowsocksX-NG", category: "ProxyDiagnostics")
 
     func start() {
         guard Thread.isMainThread else {
@@ -32,6 +34,11 @@ final class ConnectTestigManager {
         let batch = ProxyTestBatch()
         self.batch = batch
         batch.start(configurations: configurations, helperURL: helper, update: { index, result in
+            let host = configurations[index]["server"] as? String ?? ""
+            let status = result.failure?.rawValue ?? "success"
+            let detail = result.failureDetail ?? ""
+            let latency = result.latency ?? -1
+            self.logger.notice("Proxy test host=\(host, privacy: .public) latency_ms=\(latency) status=\(status, privacy: .public) detail=\(detail, privacy: .public)")
             // Sorting/subscriptions may replace the original profile objects or their array positions.
             if let profile = ServerProfileManager.instance.profiles.first(where: { $0.uuid == ids[index] }) {
                 profile.proxyTestState.complete(result: result, configuration: configurations[index], current: profile.proxyTestConfiguration())

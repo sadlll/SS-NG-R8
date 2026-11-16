@@ -32,7 +32,7 @@ rm -rf ~/Library/Caches/com.qiuyuzhou.ShadowsocksX-NG
 
 # ShadowsocksX-NG-R
 
-Current version is [2.1.0](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.1.0)
+Current version is [2.1.1](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.1.1)
 
 当前发行包适用于 Apple Silicon、macOS 14 或更新版本。服务器测试已改为真实 HTTPS 代理请求，并显示直连/中继状态。详见[代理测试说明](docs/proxy-diagnostics.md)。
 
@@ -45,7 +45,7 @@ Current version is [2.1.0](https://github.com/sadlll/SS-NG-R8/releases/tag/v2.1.
 
 Next Generation of [ShadowsocksX](https://github.com/shadowsocks/shadowsocks-iOS) with SSR support.
 
-手动下载安装时，可使用同一 Release 提供的 `.sha256` 文件检查下载是否完整：`shasum -a 256 -c ShadowsocksX-NG-R8-v2.1.0-arm64.dmg.sha256`。应用内更新会额外验证内置公钥对应的签名。发行包使用 ad-hoc 签名，尚未经 Apple 公证。
+手动下载安装时，可使用同一 Release 提供的 `.sha256` 文件检查下载是否完整：`shasum -a 256 -c ShadowsocksX-NG-R8-v2.1.1-arm64.dmg.sha256`。应用内更新会额外验证内置公钥对应的签名。发行包使用 ad-hoc 签名，尚未经 Apple 公证。
 
 ## Why?
 

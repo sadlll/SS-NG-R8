@@ -16,6 +16,7 @@ enum ProxyTestFailure: String, Error {
     case helperUnavailable = "Proxy helper unavailable"
     case startup = "Proxy helper failed to start"
     case request = "Proxy HTTPS request failed"
+    case timeout = "Proxy request timed out"
     case cancelled = "Proxy test cancelled"
 
     var title: String { NSLocalizedString(rawValue, comment: "Proxy test failure") }
@@ -25,6 +26,7 @@ struct ProxyTestResult {
     let latency: Double?
     let failure: ProxyTestFailure?
     var connection = OverlayConnection(kind: .unknown, source: "")
+    var failureDetail: String?
     let testedAt = Date()
 }
 

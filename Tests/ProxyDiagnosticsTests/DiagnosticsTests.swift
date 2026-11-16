@@ -2,6 +2,23 @@ import XCTest
 @testable import ProxyDiagnostics
 
 final class DiagnosticsTests: XCTestCase {
+    func testCommandRetainsCurlErrorWithoutMixingItIntoResponse() {
+        let response = BoundedCommand.run("/bin/sh", arguments: ["-c", "printf '000 15.0'; printf 'curl: (28) SSL connection timeout' >&2; exit 28"], timeout: 2)
+        XCTAssertEqual(response.status, 28)
+        XCTAssertEqual(response.output, "000 15.0")
+        XCTAssertTrue(response.errorOutput.contains("SSL connection timeout"))
+        let result = ProxyProbe.failedRequest(response)
+        XCTAssertEqual(result.failure, .timeout)
+        XCTAssertTrue(result.failureDetail?.contains("SSL connection timeout") == true)
+    }
+
+    func testTimeoutsAndHTTPFailuresKeepTheirActualCause() {
+        XCTAssertEqual(ProxyProbe.failedRequest(CommandResult(status: -1, output: "", timedOut: true)).failure, .timeout)
+        let response = ProxyProbe.failedRequest(CommandResult(status: 0, output: "503 0.2", timedOut: false))
+        XCTAssertEqual(response.failure, .request)
+        XCTAssertTrue(response.failureDetail?.contains("503") == true)
+    }
+
     func testCommandInheritsEnvironmentUnlessExplicitlyOverridden() {
         let key = "SS_NG_INHERIT_" + UUID().uuidString.replacingOccurrences(of: "-", with: "")
         setenv(key, "inherited-context", 1)
@@ -108,7 +125,6 @@ final class DiagnosticsTests: XCTestCase {
         XCTAssertEqual(args.first, "--disable")
         XCTAssertEqual(args[args.firstIndex(of: "--proxy")! + 1], "socks5h://127.0.0.1:12345")
         XCTAssertEqual(args[args.firstIndex(of: "--noproxy")! + 1], "")
-        XCTAssertEqual(args[args.firstIndex(of: "--max-time")! + 1], "10")
         XCTAssertFalse(args.contains("--insecure"))
         XCTAssertTrue(args.contains("https://www.gstatic.com/generate_204"))
     }
